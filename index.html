@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -813,6 +813,27 @@
       white-space: nowrap;
     }
 
+    .scene-lead-btn {
+      min-height: 28px;
+      padding: 5px 10px;
+      color: var(--blue);
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .28);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .01em;
+      cursor: pointer;
+    }
+
+    .scene-lead-btn:hover,
+    .scene-lead-btn:focus-visible {
+      background: #fff1f7;
+      border-color: var(--pink);
+      box-shadow: 0 0 0 2px rgba(236, 57, 131, .14);
+      outline: 0;
+    }
+
     .scene-stat {
       color: var(--muted);
       font-size: 12px;
@@ -870,13 +891,13 @@
 
     .take-header {
       display: grid;
-      grid-template-columns: 34px .7fr 1.1fr 1.25fr .42fr .98fr .98fr .98fr .98fr .42fr 1.15fr;
+      grid-template-columns: 32px 34px .7fr 1.1fr 1.25fr .42fr .98fr .98fr .98fr .98fr .42fr 1.15fr;
       align-items: center;
       gap: 0;
       padding: 0 14px;
-      color: var(--muted);
-      background: #f8f9fb;
-      border-bottom: 1px solid var(--line);
+      color: #fff;
+      background: var(--blue);
+      border-bottom: 1px solid rgba(22, 38, 90, .25);
       font-size: 12px;
       font-weight: 800;
       letter-spacing: .04em;
@@ -895,7 +916,10 @@
       white-space: nowrap;
     }
 
-    .take-header span + span,
+    .take-header span + span {
+      border-left: 1px solid rgba(255, 255, 255, .22);
+    }
+
     .take-row > * + * {
       border-left: 1px solid rgba(22, 38, 90, .18);
     }
@@ -904,16 +928,16 @@
       position: relative;
       min-height: 48px;
       display: grid;
-      grid-template-columns: 34px .7fr 1.1fr 1.25fr .42fr .98fr .98fr .98fr .98fr .42fr 1.15fr;
+      grid-template-columns: 32px 34px .7fr 1.1fr 1.25fr .42fr .98fr .98fr .98fr .98fr .42fr 1.15fr;
       align-items: center;
       gap: 0;
       padding: 5px 14px;
       background: #f8f9fb;
       border: 1px solid rgba(22, 38, 90, .55);
-      border-radius: 16px 5px 16px 5px;
+      border-radius: 8px;
       cursor: default;
       transform-origin: center;
-      transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, min-height .2s ease, opacity .15s ease, transform .2s ease;
+      transition: background-color .09s ease, border-color .09s ease, box-shadow .09s ease, min-height .09s ease, opacity .08s ease, transform .09s ease;
       touch-action: pan-y;
     }
 
@@ -931,6 +955,15 @@
       border-color: var(--pink);
       box-shadow: 0 0 0 2px var(--pink), 0 8px 18px rgba(236, 57, 131, .14);
       transform: scale(1.006);
+    }
+
+    .take-row.moved-flash {
+      animation: movedTakeFlash 1s ease-out;
+    }
+
+    @keyframes movedTakeFlash {
+      0% { background: #b7d6f5; }
+      100% { background: #f8f9fb; }
     }
 
     .take-row.dragging {
@@ -960,6 +993,22 @@
     .take-row > .add-take-hover {
       border-left: 0;
       padding: 0;
+    }
+
+    .take-select-cell {
+      display: grid;
+      place-items: center;
+      border-left: 0;
+      padding: 0;
+    }
+
+    .take-select-checkbox {
+      width: 16px;
+      height: 16px;
+      min-height: 16px !important;
+      padding: 0 !important;
+      accent-color: var(--pink);
+      cursor: pointer !important;
     }
 
     .take-row > .take-move-handle {
@@ -1011,6 +1060,13 @@
       cursor: text;
     }
 
+    .take-row input:hover,
+    .take-row select:hover,
+    .take-row .shot-action:hover {
+      outline: 1px solid #9bc7f5;
+      outline-offset: 1px;
+    }
+
     .take-row .artist-select {
       background-color: #e9eff6;
       border-color: rgba(22, 38, 90, .55);
@@ -1043,7 +1099,7 @@
     }
 
     .take-row input[data-field="comments"] {
-      border-radius: 3px 5px 5px 3px;
+      border-radius: 3px 8px 8px 3px;
     }
 
     .take-meta {
@@ -1123,10 +1179,13 @@
       box-shadow: 0 16px 36px rgba(22, 38, 90, .18);
     }
 
-    .scene-context-menu {
+    .scene-context-menu,
+    .lead-popover {
       position: fixed;
       z-index: 90;
-      width: min(190px, calc(100vw - 32px));
+      width: min(210px, calc(100vw - 32px));
+      display: grid;
+      gap: 6px;
       padding: 8px;
       background: #fff;
       border: 1px solid rgba(22, 38, 90, .24);
@@ -1134,16 +1193,50 @@
       box-shadow: 0 16px 36px rgba(22, 38, 90, .18);
     }
 
-    .scene-context-menu button {
+    .scene-context-menu button,
+    .lead-popover button {
       width: 100%;
       min-height: 34px;
       padding: 7px 9px;
-      color: var(--bad);
+      color: var(--blue);
       background: #fff;
-      border: 1px solid rgba(199, 65, 95, .24);
+      border: 1px solid rgba(22, 38, 90, .24);
       border-radius: 8px 3px 8px 3px;
       font-weight: 900;
       text-align: left;
+    }
+
+    
+    .lead-popover button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 400;
+    }
+
+    .lead-popover button svg {
+      width: 14px;
+      height: 14px;
+      flex: 0 0 14px;
+    }
+
+    .lead-popover button:not(.lead-clear-option):hover,
+    .lead-popover button:not(.lead-clear-option):focus-visible {
+      background: #fff1f7;
+    }
+
+    .lead-popover button.lead-clear-option {
+      background: #eef2f7;
+    }
+
+    .lead-popover button.lead-clear-option:hover,
+    .lead-popover button.lead-clear-option:focus-visible {
+      background: #e3e9f2;
+    }
+
+    .scene-context-menu button[data-delete-scene] {
+      color: var(--bad);
+      border-color: rgba(199, 65, 95, .24);
     }
 
     .shot-progress-summary {
@@ -1515,7 +1608,7 @@
       .detail-layout { grid-template-columns: 1fr; }
       .take-header,
       .take-row {
-        grid-template-columns: 34px .65fr 1.1fr 1.05fr .34fr .82fr .82fr .82fr .82fr .34fr .9fr;
+        grid-template-columns: 32px 34px .65fr 1.1fr 1.05fr .34fr .82fr .82fr .82fr .82fr .34fr .9fr;
       }
       .take-row { padding-inline: 10px; }
       .take-row input,
@@ -1556,8 +1649,8 @@
       }
       .shot-table { min-width: 0; }
       .take-row {
-        grid-template-columns: 82px minmax(0, 1fr);
-        border-radius: 16px 6px 16px 6px;
+        grid-template-columns: 32px 34px 82px minmax(0, 1fr);
+        border-radius: 10px;
       }
       .take-row > * + * { border-left: 0; }
       .take-header { display: none; }
@@ -1580,6 +1673,57 @@
       .wizard-head,
       .wizard-body,
       .wizard-foot { padding-inline: 16px; }
+    }
+
+    /* === Shots page cover === */
+    .shots-cover {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 18px 8px 18px 8px;
+      background: var(--blue-2);
+      margin-bottom: 20px;
+    }
+
+    .shots-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* === Shots topbar project selector === */
+    .shots-project-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    select.shots-topbar-select {
+      width: auto;
+      min-height: 0;
+      padding: 0 4px;
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid var(--blue);
+      border-radius: 0;
+      color: var(--blue);
+      font-size: clamp(22px, 2.6vw, 30px);
+      font-weight: 900;
+      line-height: 1.05;
+      outline: none;
+    }
+
+    select.shots-topbar-select:focus {
+      border-color: var(--pink);
+      box-shadow: none;
+    }
+
+    .shots-topbar-sep {
+      color: var(--muted);
+      font-size: clamp(18px, 2vw, 26px);
+      font-weight: 600;
     }
   </style>
 </head>
@@ -1654,9 +1798,18 @@
     <main>
       <header class="topbar">
         <div>
-          <p class="kicker">Sagui Studio · Production command center</p>
-          <h1>Track films, reels, scenes, and shots without drowning in spreadsheets.</h1>
-          <p>A lean prototype focused only on production management: project overview, pipeline progress, shot tracking, weekly timeline, and status risks.</p>
+          <div id="topbarDefault">
+            <p class="kicker">Sagui Studio · Production command center</p>
+            <h1>Track films, reels, scenes, and shots without drowning in spreadsheets.</h1>
+            <p>A lean prototype focused only on production management: project overview, pipeline progress, shot tracking, weekly timeline, and status risks.</p>
+          </div>
+          <div id="topbarShots" style="display:none">
+            <p class="kicker">Sagui Studio · Shots</p>
+            <div class="shots-project-header">
+              <select id="shotProject" class="shots-topbar-select" aria-label="Select project"></select>
+              <span class="shots-topbar-sep">· Shots</span>
+            </div>
+          </div>
         </div>
         <div class="top-actions">
           <button class="btn" id="resetBtn" type="button">Reset demo</button>
@@ -1713,11 +1866,11 @@
       </section>
 
       <section id="shots" class="section">
+        <div class="shots-cover" id="shotsCover" style="display:none"></div>
         <div class="metric-grid" id="shotMetrics"></div>
         <div id="shotProgressSummary"></div>
         <div class="toolbar">
           <div class="filters">
-            <select id="shotProject"></select>
             <select id="shotStatus">
               <option value="all">All statuses</option>
               <option value="Approved">Approved</option>
@@ -1726,9 +1879,12 @@
               <option value="Render pending">Render pending</option>
             </select>
             <select id="shotArtist"></select>
+            <select id="shotLead" aria-label="Filter by lead"><option value="all">All leads</option></select>
             <input id="shotSearch" placeholder="Search scene, shot, artist, file">
+            <button class="btn" id="clearShotFiltersBtn" type="button">Clear filter</button>
           </div>
           <div class="filters">
+            <button class="btn icon-btn" id="downloadExcelBtn" type="button" aria-label="Download Excel sheet" title="Download Excel sheet" data-icon="download"></button>
             <button class="btn icon-btn" id="expandAllShotsBtn" type="button" aria-label="Expand all scenes" title="Expand all scenes" data-icon="expand"></button>
             <button class="btn icon-btn" id="collapseAllShotsBtn" type="button" aria-label="Collapse all scenes" title="Collapse all scenes" data-icon="collapse"></button>
             <button class="btn primary" id="addShotBtn" type="button">Add Scene</button>
@@ -1882,8 +2038,10 @@
       user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
       flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h12l-2 4 2 4H5"/></svg>',
       plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
+      download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/><path d="M6 17v4"/><path d="M18 17v4"/></svg>',
       expand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5"/><path d="M16 3h5v5"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/><path d="m3 3 7 7"/><path d="m21 3-7 7"/><path d="m21 21-7-7"/><path d="m3 21 7-7"/></svg>',
-      collapse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v7H3"/><path d="M14 3v7h7"/><path d="M14 21v-7h7"/><path d="M10 21v-7H3"/><path d="m3 10 7-7"/><path d="m21 10-7-7"/><path d="m21 14-7 7"/><path d="m3 14 7 7"/></svg>'
+      collapse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v7H3"/><path d="M14 3v7h7"/><path d="M14 21v-7h7"/><path d="M10 21v-7H3"/><path d="m3 10 7-7"/><path d="m21 10-7-7"/><path d="m21 14-7 7"/><path d="m3 14 7 7"/></svg>',
+      brush: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7L15.3 4.9a2.2 2.2 0 0 1 3.1 0l.7.7a2.2 2.2 0 0 1 0 3.1L8.7 19.1 3 21Z"/><path d="m13.5 6.7 3.8 3.8"/><path d="M10 21h11"/></svg>'
     };
 
     const seedData = {
@@ -1960,12 +2118,15 @@
     let data = loadData();
     const selectedShotIds = new Set();
     let selectedThumbnailShotId = "";
+    let recentlyMovedShotIds = new Set();
     let wizardStep = 0;
     const defaultProjectStages = ["Concept", "Script", "Storyboard", "Design", "Rig", "Animation", "Sync", "Render", "Delivery"];
 
     function loadData() {
       const stored = localStorage.getItem(storeKey);
-      return stored ? JSON.parse(stored) : structuredClone(seedData);
+      const loaded = stored ? JSON.parse(stored) : structuredClone(seedData);
+      loaded.sceneLeads = loaded.sceneLeads || {};
+      return loaded;
     }
 
     function saveData(showToast = true) {
@@ -2149,18 +2310,28 @@
 
     function renderShots() {
       const project = document.getElementById("shotProject").value || data.projects[0].id;
+      updateShotsCover(project);
       const status = document.getElementById("shotStatus").value;
       const previousArtist = document.getElementById("shotArtist").value || "all";
-      const search = document.getElementById("shotSearch").value.toLowerCase();
+            const previousLead = document.getElementById("shotLead")?.value || "all";
+const search = document.getElementById("shotSearch").value.toLowerCase();
       const artists = [...new Set(data.shots.map(shot => shot.artist))].sort();
       document.getElementById("shotArtist").innerHTML = `<option value="all">All artists</option>${artists.map(artist => `<option>${artist}</option>`).join("")}`;
       document.getElementById("shotArtist").value = previousArtist;
 
-      const rows = data.shots.filter(shot => {
+            const leads = [...new Set(Object.entries(data.sceneLeads || {})
+        .filter(([key, lead]) => key.startsWith(`${project}::`) && lead)
+        .map(([, lead]) => lead))].sort();
+      const leadSelect = document.getElementById("shotLead");
+      leadSelect.innerHTML = `<option value="all">All leads</option>${leads.map(lead => `<option>${lead}</option>`).join("")}`;
+      leadSelect.value = leads.includes(previousLead) ? previousLead : "all";
+      const activeLead = leadSelect.value || "all";
+const rows = data.shots.filter(shot => {
         const text = `${shot.scene} ${shot.code} ${shot.artist} ${shot.file}`.toLowerCase();
         const statusMatch = status === "all" || shot.animStatus === status || shot.renderStatus === status;
         const artistMatch = previousArtist === "all" || shot.artist === previousArtist;
-        return shot.project === project && statusMatch && artistMatch && text.includes(search);
+        const leadMatch = activeLead === "all" || sceneLead(project, shot.scene) === activeLead;
+        return shot.project === project && statusMatch && artistMatch && leadMatch && text.includes(search);
       });
 
       const seconds = rows.reduce((sum, shot) => sum + Number(shot.seconds || 0), 0);
@@ -2186,6 +2357,7 @@
       bindShotDrag();
       bindThumbnailTargets();
       bindSceneContextMenus();
+      bindSceneLeads();
       bindSceneToggles();
     }
 
@@ -2240,6 +2412,8 @@
       const progress = total ? Math.round((approved / total) * 100) : 0;
       const storageKey = `sagui-scene-open-${group.scene}`;
       const isOpen = localStorage.getItem(storageKey) !== "0";
+      const project = document.getElementById("shotProject").value || data.projects[0].id;
+      const lead = sceneLead(project, group.scene);
       return `
         <details class="scene-sheet" data-scene="${escapeAttr(group.scene)}" ${isOpen ? "open" : ""}>
           <summary>
@@ -2247,6 +2421,7 @@
             <span class="scene-title">
               <span>${group.scene}</span>
               <small>· Takes ${takeRange(group.shots)} · ${total} takes</small>
+              <button class="scene-lead-btn" type="button" data-scene-lead="${escapeAttr(group.scene)}">${lead ? `Lead: ${escapeHtml(lead)}` : "Add Lead"}</button>
             </span>
             <span class="scene-stat">Completed</span>
             <span class="stage" style="grid-template-columns:1fr 42px"><span class="progress"><span class="bar" style="--value:${progress}%"></span></span><strong>${progress}%</strong></span>
@@ -2254,6 +2429,7 @@
           <div class="scene-body">
             <div class="shot-table">
               <div class="take-header">
+                <span></span>
                 <span></span>
                 <span>Thumbnail</span>
                 <span>Name</span>
@@ -2275,9 +2451,13 @@
 
     function shotRow(shot) {
       const selected = selectedShotIds.has(shot.id) ? " selected" : "";
+      const moved = recentlyMovedShotIds.has(shot.id) ? " moved-flash" : "";
       const artists = artistOptions(shot.artist);
       return `
-        <div class="take-row${selected}" data-shot="${shot.id}" aria-label="Select ${escapeAttr(shot.code)}">
+        <div class="take-row${selected}${moved}" data-shot="${shot.id}" aria-label="Take ${escapeAttr(shot.code)}">
+          <label class="take-select-cell" aria-label="Select ${escapeAttr(shot.code)}">
+            <input class="take-select-checkbox" type="checkbox" data-select-shot="${escapeAttr(shot.id)}" ${selected ? "checked" : ""}>
+          </label>
           <button class="take-move-handle" type="button" draggable="true" aria-label="Drag ${escapeAttr(shot.code)} to reorder" title="Move take">${moveIcon()}</button>
           ${shotThumb(shot)}
           <input class="take-code" data-field="code" value="${escapeAttr(shot.code)}" aria-label="Shot code">
@@ -2417,8 +2597,13 @@
         thumb.addEventListener("click", event => {
           event.preventDefault();
           event.stopPropagation();
-          selectedThumbnailShotId = thumb.dataset.thumbnailShot;
+          const nextThumbnailId = thumb.dataset.thumbnailShot;
           document.querySelectorAll("#shotSheet .shot-thumb.thumbnail-target").forEach(item => item.classList.remove("thumbnail-target"));
+          if (selectedThumbnailShotId === nextThumbnailId) {
+            selectedThumbnailShotId = "";
+            return;
+          }
+          selectedThumbnailShotId = nextThumbnailId;
           thumb.classList.add("thumbnail-target");
         });
       });
@@ -2441,6 +2626,18 @@
       });
     }
 
+    function deleteSelectedThumbnail() {
+      if (!selectedThumbnailShotId) return false;
+      const shot = data.shots.find(item => item.id === selectedThumbnailShotId);
+      if (!shot?.thumbnail) return false;
+      shot.thumbnail = "";
+      selectedThumbnailShotId = "";
+      saveData(false);
+      renderShots();
+      toast("Thumbnail removed.");
+      return true;
+    }
+
     function readImageFile(file, callback) {
       const reader = new FileReader();
       reader.onload = () => callback(reader.result);
@@ -2458,15 +2655,83 @@
       });
     }
 
+    function sceneKey(project, scene) {
+      return `${project}::${scene}`;
+    }
+
+    function sceneLead(project, scene) {
+      return data.sceneLeads?.[sceneKey(project, scene)] || "";
+    }
+
+    function setSceneLead(project, scene, lead) {
+      data.sceneLeads = data.sceneLeads || {};
+      const key = sceneKey(project, scene);
+      if (lead) data.sceneLeads[key] = lead;
+      else delete data.sceneLeads[key];
+    }
+
+    function bindSceneLeads() {
+      document.querySelectorAll("[data-scene-lead]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          openLeadMenu(button, button.dataset.sceneLead);
+        });
+      });
+    }
+
+    function openLeadMenu(anchor, scene) {
+      const rect = anchor.getBoundingClientRect();
+      document.querySelector(".lead-popover")?.remove();
+      document.querySelector(".scene-context-menu")?.remove();
+      const project = document.getElementById("shotProject").value || data.projects[0].id;
+      const popover = document.createElement("div");
+      popover.className = "lead-popover";
+      popover.innerHTML = `
+        <button type="button" data-lead-value="Gabriel Prado">Gabriel Prado</button>
+        <button type="button" data-lead-value="Everton Amorim">Everton Amorim</button>
+        <button class="lead-clear-option" type="button" data-lead-value="">${icon("brush")}<span>Clear lead</span></button>
+      `;
+      document.body.appendChild(popover);
+      const left = Math.min(rect.left, window.innerWidth - popover.offsetWidth - 16);
+      const top = Math.min(rect.bottom + 8, window.innerHeight - popover.offsetHeight - 16);
+      popover.style.left = `${Math.max(16, left)}px`;
+      popover.style.top = `${Math.max(16, top)}px`;
+      popover.querySelectorAll("[data-lead-value]").forEach(button => {
+        button.addEventListener("click", () => {
+          setSceneLead(project, scene, button.dataset.leadValue);
+          saveData(false);
+          popover.remove();
+          renderShots();
+        });
+      });
+      setTimeout(() => {
+        document.addEventListener("pointerdown", function closeLeadMenu(event) {
+          if (!popover.contains(event.target) && event.target !== anchor) {
+            popover.remove();
+            document.removeEventListener("pointerdown", closeLeadMenu);
+          }
+        });
+      });
+    }
+
     function openSceneMenu(event, scene) {
       document.querySelector(".scene-context-menu")?.remove();
+      document.querySelector(".lead-popover")?.remove();
       const menu = document.createElement("div");
       menu.className = "scene-context-menu";
-      menu.innerHTML = `<button type="button">Delete scene</button>`;
+      menu.innerHTML = `
+        <button type="button" data-scene-lead-menu>Add Lead</button>
+        <button type="button" data-delete-scene>Delete scene</button>
+      `;
       document.body.appendChild(menu);
       menu.style.left = `${Math.min(event.clientX, window.innerWidth - menu.offsetWidth - 16)}px`;
       menu.style.top = `${Math.min(event.clientY, window.innerHeight - menu.offsetHeight - 16)}px`;
-      menu.querySelector("button").addEventListener("click", () => {
+      menu.querySelector("[data-scene-lead-menu]").addEventListener("click", () => {
+        openLeadMenu(menu, scene);
+        menu.remove();
+      });
+      menu.querySelector("[data-delete-scene]").addEventListener("click", () => {
         deleteScene(scene);
         menu.remove();
       });
@@ -2536,21 +2801,26 @@
     }
 
     function bindShotSelection() {
-      document.querySelectorAll("#shotSheet .take-row").forEach(row => {
-        row.addEventListener("click", event => {
-          if (isInteractiveCell(event.target)) return;
-          event.preventDefault();
+      document.querySelectorAll("#shotSheet [data-select-shot]").forEach(checkbox => {
+        checkbox.addEventListener("click", event => {
           event.stopPropagation();
-          if (event.ctrlKey || event.metaKey) {
-            toggleShotSelection(row.dataset.shot, row);
-          } else {
-            const wasSelected = selectedShotIds.has(row.dataset.shot) && selectedShotIds.size === 1;
+          const id = checkbox.dataset.selectShot;
+          const row = checkbox.closest(".take-row");
+          if (!event.ctrlKey && !event.metaKey) {
             selectedShotIds.clear();
-            document.querySelectorAll("#shotSheet .take-row.selected").forEach(item => item.classList.remove("selected"));
-            if (!wasSelected) {
-              selectedShotIds.add(row.dataset.shot);
-              row.classList.add("selected");
-            }
+            document.querySelectorAll("#shotSheet [data-select-shot]").forEach(item => {
+              if (item !== checkbox) item.checked = false;
+            });
+            document.querySelectorAll("#shotSheet .take-row.selected").forEach(item => {
+              if (item !== row) item.classList.remove("selected");
+            });
+          }
+          if (checkbox.checked) {
+            selectedShotIds.add(id);
+            row.classList.add("selected");
+          } else {
+            selectedShotIds.delete(id);
+            row.classList.remove("selected");
           }
         });
       });
@@ -2560,13 +2830,20 @@
       return Boolean(target.closest("input, select, button, a"));
     }
 
+    function isTextEditing(target) {
+      return Boolean(target.closest?.("input, textarea, select, [contenteditable='true']"));
+    }
+
     function toggleShotSelection(id, row) {
+      const checkbox = row.querySelector("[data-select-shot]");
       if (selectedShotIds.has(id)) {
         selectedShotIds.delete(id);
         row.classList.remove("selected");
+        if (checkbox) checkbox.checked = false;
       } else {
         selectedShotIds.add(id);
         row.classList.add("selected");
+        if (checkbox) checkbox.checked = true;
       }
     }
 
@@ -2649,11 +2926,16 @@
       const nextTargetIndex = data.shots.findIndex(shot => shot.id === targetId);
       const insertIndex = beforeTarget ? nextTargetIndex : nextTargetIndex + 1;
       data.shots.splice(insertIndex, 0, ...selectedGroup);
+      recentlyMovedShotIds = new Set(selectedGroup.map(shot => shot.id));
       saveData(false);
       renderShots();
       renderDashboard();
       renderProjectDetail();
       renderTimeline();
+      setTimeout(() => {
+        recentlyMovedShotIds.clear();
+        renderShots();
+      }, 1000);
     }
 
     function normaliseShotField(field, value) {
@@ -2719,7 +3001,9 @@
       const existing = data.shots.filter(shot => shot.project === project && shot.scene === scene);
       const next = existing.length + 1;
       const afterShot = afterShotId ? data.shots.find(item => item.id === afterShotId) : null;
-      const shot = createShot(project, scene, next, afterShot ? continuationCode(afterShot) : "");
+      const isLastTake = afterShot && existing[existing.length - 1]?.id === afterShot.id;
+      const customCode = afterShot ? (isLastTake ? nextSceneCode(afterShot, existing) : continuationCode(afterShot)) : "";
+      const shot = createShot(project, scene, next, customCode);
       const afterIndex = afterShotId ? data.shots.findIndex(item => item.id === afterShotId) : -1;
       if (afterIndex >= 0) {
         data.shots.splice(afterIndex + 1, 0, shot);
@@ -2743,6 +3027,18 @@
       return `${root}.${next}`;
     }
 
+
+    function nextSceneCode(afterShot, sceneShots) {
+      const parts = afterShot.code.match(/^(.*?)(\d+)(?:\.\d+)?$/);
+      if (!parts) return continuationCode(afterShot);
+      const [, prefix, number] = parts;
+      const pattern = new RegExp(`^${escapeRegExp(prefix)}(\\d+)(?:\\.\\d+)?$`, "i");
+      const maxNumber = sceneShots
+        .map(shot => Number((shot.code.match(pattern) || [])[1]))
+        .filter(Boolean)
+        .reduce((highest, value) => Math.max(highest, value), Number(number));
+      return `${prefix}${String(maxNumber + 1).padStart(number.length, "0")}`;
+    }
     function sceneShotCode(project, scene, number) {
       const sceneNumber = scene.match(/\d+/)?.[0] || "01";
       return `${projectCode(project)}_SC${String(sceneNumber).padStart(2, "0")}_TK_${String(number).padStart(3, "0")}`;
@@ -2812,9 +3108,25 @@
       return escapeHtml(value).replace(/\n/g, " ");
     }
 
+    function updateShotsCover(projectId) {
+      const project = data.projects.find(p => p.id === projectId);
+      const cover = document.getElementById("shotsCover");
+      if (!cover) return;
+      if (project?.thumbnail) {
+        cover.innerHTML = `<img src="${escapeAttr(project.thumbnail)}" alt="${escapeAttr(project.name)} cover">`;
+        cover.style.display = "";
+      } else {
+        cover.innerHTML = "";
+        cover.style.display = "none";
+      }
+    }
+
     function switchSection(id) {
       document.querySelectorAll(".section").forEach(section => section.classList.toggle("active", section.id === id));
       document.querySelectorAll(".nav-btn").forEach(button => button.classList.toggle("active", button.dataset.section === id));
+      const isShots = id === "shots";
+      document.getElementById("topbarDefault").style.display = isShots ? "none" : "";
+      document.getElementById("topbarShots").style.display = isShots ? "" : "none";
       if (id === "dashboard") renderDashboard();
       if (id === "projects") renderProjectDetail();
       if (id === "shots") renderShots();
@@ -2988,6 +3300,22 @@
       readImageFile(file, setProjectCoverPreview);
     }
 
+    function deleteSelectedTakes() {
+      const count = selectedShotIds.size;
+      if (!count) return false;
+      const confirmed = window.confirm(`Confirm deleting of ${count} take${count === 1 ? "" : "s"}?`);
+      if (!confirmed) return true;
+      data.shots = data.shots.filter(shot => !selectedShotIds.has(shot.id));
+      if (selectedShotIds.has(selectedThumbnailShotId)) selectedThumbnailShotId = "";
+      selectedShotIds.clear();
+      saveData(false);
+      renderDashboard();
+      renderProjectDetail();
+      renderShots();
+      renderTimeline();
+      toast(`${count} take${count === 1 ? "" : "s"} deleted.`);
+      return true;
+    }
     function bindEvents() {
       document.querySelectorAll("[data-icon]").forEach(el => { el.innerHTML = icon(el.dataset.icon); });
       document.querySelectorAll(".nav-btn").forEach(button => button.addEventListener("click", () => switchSection(button.dataset.section)));
@@ -3058,12 +3386,26 @@
       coverFile.addEventListener("change", event => handleProjectCoverFile(event.target.files[0]));
       document.addEventListener("keydown", event => {
         if (event.key === "Escape" && document.getElementById("projectWizardModal").classList.contains("open")) closeProjectWizard();
+        if ((event.key === "Delete" || event.key === "Backspace") && !isTextEditing(event.target)) {
+        if (event.key === "Delete" && deleteSelectedTakes()) {
+          event.preventDefault();
+          return;
+        }
+        if (deleteSelectedThumbnail()) event.preventDefault();
+      }
       });
       document.addEventListener("paste", pasteImageIntoSelectedThumbnail);
       document.getElementById("projectFilter").addEventListener("change", renderDashboard);
       document.getElementById("detailProject").addEventListener("change", renderProjectDetail);
-      ["shotProject", "shotStatus", "shotArtist"].forEach(id => document.getElementById(id).addEventListener("change", renderShots));
+      ["shotProject", "shotStatus", "shotArtist", "shotLead"].forEach(id => document.getElementById(id).addEventListener("change", renderShots));
       document.getElementById("shotSearch").addEventListener("input", renderShots);
+      document.getElementById("clearShotFiltersBtn").addEventListener("click", () => {
+        document.getElementById("shotStatus").value = "all";
+        document.getElementById("shotArtist").value = "all";
+        document.getElementById("shotLead").value = "all";
+        document.getElementById("shotSearch").value = "";
+        renderShots();
+      });
       document.getElementById("timelineProject").addEventListener("change", renderTimeline);
       document.getElementById("expandAllShotsBtn").addEventListener("click", () => {
         document.querySelectorAll(".scene-sheet").forEach(scene => {
@@ -3100,3 +3442,8 @@
   </script>
 </body>
 </html>
+
+
+
+
+
