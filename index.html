@@ -1,0 +1,3102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sagui Studio Manager</title>
+  <style>
+    :root {
+      --blue: #16265A;
+      --blue-2: #29314F;
+      --pink: #EC3983;
+      --cream: #fff;
+      --yellow: #F2A92A;
+      --paper: #f3f4f6;
+      --ink: #16265A;
+      --muted: rgba(22, 38, 90, .68);
+      --line: rgba(22, 38, 90, .16);
+      --white: #fff;
+      --ok: #3A8F6C;
+      --warn: #D78726;
+      --bad: #C7415F;
+      --radius: 18px;
+      --shadow: 0 8px 18px rgba(22, 38, 90, .06);
+      --sidebar: 264px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+      transition: grid-template-columns .2s ease;
+    }
+
+    .app.collapsed { --sidebar: 88px; }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 18px 14px;
+      background: var(--blue);
+      color: var(--cream);
+      border-right: 6px solid var(--pink);
+      overflow: visible;
+    }
+
+    .brand {
+      min-height: 102px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px 14px;
+      border: 0;
+      background: transparent;
+    }
+
+    .brand img {
+      width: 72px;
+      max-width: 100%;
+      display: block;
+    }
+
+    .app.collapsed .brand {
+      min-height: 74px;
+      padding: 8px;
+    }
+
+    .app.collapsed .brand img { width: 36px; }
+
+    .app.collapsed .nav-label,
+    .app.collapsed .nav-heading,
+    .app.collapsed .user-details,
+    .app.collapsed .collapse-label { display: none; }
+
+    .collapse {
+      position: absolute;
+      top: 20px;
+      right: -20px;
+      z-index: 10;
+      width: 20px;
+      height: 58px;
+      min-height: 58px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--pink);
+      border: 0;
+      border-radius: 0 10px 10px 0;
+      font-weight: 900;
+      box-shadow: 0 4px 10px rgba(22, 38, 90, .12);
+    }
+
+    nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav-group {
+      display: grid;
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .nav-heading {
+      padding: 8px 10px 4px;
+      color: rgba(255, 255, 255, .52);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .nav-btn {
+      width: 100%;
+      min-height: 46px;
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      color: var(--cream);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 16px 7px 16px 7px;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .app.collapsed .nav-btn {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      padding: 8px;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: rgba(236, 57, 131, .18);
+      border-color: rgba(255, 255, 255, .24);
+    }
+
+    .nav-icon,
+    .box-icon {
+      width: 22px;
+      aspect-ratio: 1;
+      display: inline-grid;
+      place-items: center;
+      color: currentColor;
+      line-height: 0;
+    }
+
+    .nav-icon svg,
+    .box-icon svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      margin: auto;
+    }
+
+    .user {
+      margin-top: auto;
+      min-height: 64px;
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 18px 8px 18px 8px;
+      background: rgba(255, 255, 255, .1);
+      border: 1px solid rgba(255, 255, 255, .26);
+    }
+
+    .avatar {
+      width: 42px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--pink);
+      color: var(--cream);
+      font-weight: 950;
+      border: 1px solid var(--cream);
+    }
+
+    .user strong,
+    .user span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user span {
+      margin-top: 3px;
+      color: rgba(255, 255, 255, .72);
+      font-size: 12px;
+    }
+
+    main {
+      min-width: 0;
+      padding: 24px clamp(18px, 3vw, 40px) 40px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .kicker {
+      margin: 0 0 7px;
+      color: var(--pink);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 880px;
+      margin: 0;
+      color: var(--blue);
+      font-size: clamp(22px, 2.6vw, 30px);
+      line-height: 1.05;
+    }
+
+    .topbar p {
+      max-width: 650px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn {
+      min-height: 40px;
+      padding: 9px 13px;
+      color: var(--blue);
+      background: var(--white);
+      border: 1px solid var(--blue);
+      border-radius: 14px 6px 14px 6px;
+      font-weight: 900;
+      box-shadow: 0 3px 8px rgba(22, 38, 90, .08);
+    }
+
+    .btn.primary {
+      color: var(--cream);
+      background: var(--blue);
+    }
+
+    .btn.icon-btn {
+      width: 42px;
+      min-width: 42px;
+      padding: 9px;
+      display: inline-grid;
+      place-items: center;
+      line-height: 0;
+    }
+
+    .btn.icon-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      margin-bottom: 16px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 11px;
+      color: var(--blue);
+      background: var(--white);
+      border: 1px solid rgba(22, 38, 90, .22);
+      border-radius: 14px 6px 14px 6px;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--pink);
+      box-shadow: 0 0 0 4px rgba(236, 57, 131, .12);
+    }
+
+    textarea {
+      min-height: 62px;
+      resize: vertical;
+    }
+
+    .filters input,
+    .filters select {
+      width: auto;
+      min-width: 170px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .metric,
+    .project-card,
+    .panel,
+    .column,
+    .mini {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 28px 10px 28px 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric {
+      min-height: 132px;
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 12px;
+      padding: 15px;
+      align-items: center;
+    }
+
+    .box-icon {
+      width: 32px;
+      color: var(--blue);
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      align-self: center;
+      justify-self: center;
+    }
+
+    .metric:nth-child(2) .box-icon { color: var(--pink); }
+    .metric:nth-child(3) .box-icon { color: var(--blue); }
+    .metric:nth-child(4) .box-icon { color: var(--blue); }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 7px;
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .metric p {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .project-card {
+      display: grid;
+      gap: 15px;
+      padding: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .project-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: rgba(22, 38, 90, .48);
+      background: #f3f4f6;
+      border: 1px solid var(--line);
+      border-radius: 18px 7px 18px 7px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .project-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-head {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .card-head h2 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.05;
+    }
+
+    .type {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 5px 9px;
+      border: 1px solid var(--blue);
+      border-radius: 999px;
+      color: var(--blue);
+      background: var(--cream);
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .badge.ok { background: #DDF0DF; }
+    .badge.warn { background: #FFE09D; }
+    .badge.bad { background: #FFD4DF; }
+    .badge.info { background: #DFE8FF; }
+
+    .progress {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(22, 38, 90, .14);
+      border: 1px solid rgba(22, 38, 90, .12);
+    }
+
+    .bar {
+      width: var(--value, 0%);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--pink);
+    }
+
+    .stage-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: 108px 1fr 42px;
+      gap: 9px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .mini {
+      padding: 10px;
+      border-width: 1px;
+      box-shadow: none;
+      min-width: 0;
+    }
+
+    .mini span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-weight: 950;
+    }
+
+    .mini strong {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 5px;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .mini strong svg,
+    .column h3 svg,
+    .shot-card svg,
+    .time-item svg,
+    .scene-title svg {
+      width: 14px;
+      height: 14px;
+      flex: 0 0 14px;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, .75fr);
+      gap: 16px;
+    }
+
+    .panel {
+      padding: 18px;
+      margin-bottom: 16px;
+      background: #fff;
+    }
+
+    .panel h2 {
+      margin: 0 0 13px;
+      font-size: 21px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .time-item {
+      display: grid;
+      grid-template-columns: 118px 1fr 94px;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(22, 38, 90, .12);
+    }
+
+    .time-item:last-child { border-bottom: 0; }
+
+    .time-item span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .time-item strong { font-size: 14px; }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 28px 10px 28px 10px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(22, 38, 90, .12);
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      color: var(--cream);
+      background: var(--blue);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    td input,
+    td select {
+      min-width: 118px;
+      min-height: 34px;
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+
+    td textarea {
+      min-width: 220px;
+      min-height: 58px;
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .column {
+      min-height: 260px;
+      padding-bottom: 10px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .column h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      padding: 12px;
+      color: var(--cream);
+      background: var(--blue);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .shot-card {
+      margin: 10px;
+      padding: 11px;
+      border: 1px solid var(--blue);
+      border-radius: 20px 8px 20px 8px;
+      background: var(--white);
+    }
+
+    .shot-card strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .shot-card span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .shot-sheet {
+      display: grid;
+      gap: 0;
+    }
+
+    .scene-insert-zone {
+      position: relative;
+      z-index: 4;
+      min-height: 1px;
+      height: 1px;
+      margin: -1px 0 0;
+    }
+
+    .add-scene-between {
+      position: absolute;
+      top: 0;
+      left: -17px;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--pink);
+      border: 0;
+      border-radius: 999px;
+      box-shadow: 0 8px 18px rgba(236, 57, 131, .22);
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(-50%) scale(.9);
+      transition: opacity .16s ease, transform .16s ease, box-shadow .16s ease;
+    }
+
+    .scene-insert-zone::before {
+      content: "";
+      position: absolute;
+      inset: -20px 0;
+    }
+
+    .scene-insert-zone:hover .add-scene-between,
+    .add-scene-between:focus-visible {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+
+    .add-scene-between:hover {
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: 0 10px 22px rgba(236, 57, 131, .28);
+    }
+
+    .add-scene-between svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .scene-sheet {
+      overflow: hidden;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 18px 6px 18px 6px;
+      box-shadow: var(--shadow);
+    }
+
+    .scene-sheet + .scene-insert-zone + .scene-sheet,
+    .scene-sheet + .scene-sheet {
+      margin-top: 0;
+    }
+
+    .scene-sheet summary {
+      min-height: 62px;
+      display: grid;
+      grid-template-columns: 28px minmax(220px, 1fr) 92px minmax(170px, 260px);
+      align-items: center;
+      gap: 12px;
+      padding: 14px 22px;
+      color: var(--blue);
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .scene-sheet summary::-webkit-details-marker { display: none; }
+
+    .scene-arrow {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      aspect-ratio: 1;
+      color: var(--blue);
+      background: #fff;
+      border: 0;
+      border-radius: 50%;
+      line-height: 1;
+    }
+
+    .scene-arrow svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+      transform-origin: 50% 50%;
+      transition: transform .2s ease;
+    }
+
+    .scene-sheet:not([open]) .scene-arrow svg { transform: rotate(-90deg); }
+
+    .scene-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .scene-title small {
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .scene-title span,
+    .scene-title small {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .scene-stat {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .scene-body {
+      position: relative;
+      display: grid;
+      gap: 6px;
+      padding: 0 22px 30px 22px;
+      background: #fff;
+      overflow-x: auto;
+    }
+
+    .add-take-hover {
+      position: absolute;
+      top: auto;
+      bottom: -17px;
+      left: -16px;
+      z-index: 2;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--pink);
+      border: 0;
+      border-radius: 999px;
+      box-shadow: 0 6px 14px rgba(22, 38, 90, .18);
+      opacity: 0;
+      transform: scale(.9);
+      transition: opacity .16s ease, transform .16s ease;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .add-take-hover:hover,
+    .add-take-hover:focus-visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .take-row:has(.add-take-hover:hover),
+    .take-row:has(.add-take-hover:focus-visible) {
+      box-shadow: 0 5px 0 var(--pink), 0 8px 18px rgba(236, 57, 131, .14);
+    }
+
+    .shot-table {
+      width: 100%;
+      min-width: 0;
+      overflow: visible;
+    }
+
+    .take-header {
+      display: grid;
+      grid-template-columns: 34px .7fr 1.1fr 1.25fr .42fr .98fr .98fr .98fr .98fr .42fr 1.15fr;
+      align-items: center;
+      gap: 0;
+      padding: 0 14px;
+      color: var(--muted);
+      background: #f8f9fb;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .take-header span {
+      min-width: 0;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .take-header span + span,
+    .take-row > * + * {
+      border-left: 1px solid rgba(22, 38, 90, .18);
+    }
+
+    .take-row {
+      position: relative;
+      min-height: 48px;
+      display: grid;
+      grid-template-columns: 34px .7fr 1.1fr 1.25fr .42fr .98fr .98fr .98fr .98fr .42fr 1.15fr;
+      align-items: center;
+      gap: 0;
+      padding: 5px 14px;
+      background: #f8f9fb;
+      border: 1px solid rgba(22, 38, 90, .55);
+      border-radius: 16px 5px 16px 5px;
+      cursor: default;
+      transform-origin: center;
+      transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, min-height .2s ease, opacity .15s ease, transform .2s ease;
+      touch-action: pan-y;
+    }
+
+    .take-row:active { cursor: default; }
+
+    .take-row:hover:not(.dragging) {
+      background: #fff1f7;
+      border-color: rgba(236, 57, 131, .75);
+      box-shadow: 0 0 0 1px rgba(236, 57, 131, .32);
+    }
+
+    .take-row.selected {
+      min-height: 52px;
+      background: #ffe9f2;
+      border-color: var(--pink);
+      box-shadow: 0 0 0 2px var(--pink), 0 8px 18px rgba(236, 57, 131, .14);
+      transform: scale(1.006);
+    }
+
+    .take-row.dragging {
+      opacity: .55;
+      background: #e8f2ff;
+      box-shadow: 0 10px 22px rgba(22, 38, 90, .14);
+      transform: scale(.998);
+    }
+
+    .take-row.drop-before {
+      box-shadow: 0 -3px 0 var(--pink), 0 8px 18px rgba(22, 38, 90, .08);
+    }
+
+    .take-row.drop-after {
+      box-shadow: 0 3px 0 var(--pink), 0 8px 18px rgba(22, 38, 90, .08);
+    }
+
+    .take-row > * {
+      min-width: 0;
+      align-self: center;
+      justify-self: stretch;
+      margin: 0;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .take-row > .add-take-hover {
+      border-left: 0;
+      padding: 0;
+    }
+
+    .take-row > .take-move-handle {
+      width: 28px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      justify-self: start;
+      color: var(--blue);
+      background: transparent;
+      border: 0;
+      border-left: 0;
+      border-radius: 999px;
+      opacity: 0;
+      padding: 0;
+      cursor: grab;
+      transition: opacity .16s ease, background-color .16s ease;
+    }
+
+    .take-move-handle:hover,
+    .take-move-handle:focus-visible {
+      opacity: 1;
+      background: #ffe9f2;
+    }
+
+    .take-move-handle:active {
+      cursor: grabbing;
+    }
+
+    .take-move-handle svg {
+      width: 17px;
+      height: 17px;
+      display: block;
+    }
+
+    .take-row input,
+    .take-row select {
+      min-width: 0;
+      min-height: 34px;
+      padding: 6px 8px;
+      color: var(--blue);
+      background: #e9eff6;
+      border: 1px solid rgba(22, 38, 90, .55);
+      border-radius: 3px;
+      font-size: clamp(10px, .72vw, 14px);
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: text;
+    }
+
+    .take-row .artist-select {
+      background-color: #e9eff6;
+      border-color: rgba(22, 38, 90, .55);
+    }
+
+    .take-row select {
+      appearance: none;
+      background-image: none;
+      cursor: pointer;
+    }
+
+    .take-row select:not(:focus):not(:active) {
+      border-color: transparent;
+      background-color: transparent;
+      box-shadow: none;
+    }
+
+    .take-row select:focus,
+    .take-row select:active {
+      border-color: rgba(22, 38, 90, .55);
+      box-shadow: 0 0 0 3px rgba(22, 38, 90, .08);
+    }
+
+    .take-row input.take-code {
+      background: transparent;
+      border-color: transparent;
+      font-size: clamp(10px, .72vw, 14px);
+      font-weight: 800;
+      padding-left: 12px;
+    }
+
+    .take-row input[data-field="comments"] {
+      border-radius: 3px 5px 5px 3px;
+    }
+
+    .take-meta {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .shot-thumb {
+      width: 70px;
+      height: 34px;
+      max-width: 100%;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: rgba(22, 38, 90, .48);
+      background: #e9eff6;
+      border: 1px solid rgba(22, 38, 90, .55);
+      border-radius: 6px;
+      font-size: 0;
+      font-weight: 900;
+      justify-self: start;
+      margin-left: 12px;
+      padding: 0;
+      color: rgba(22, 38, 90, .58);
+      cursor: pointer;
+    }
+
+    .shot-thumb.thumbnail-target {
+      border-color: var(--pink);
+      box-shadow: 0 0 0 2px var(--pink);
+    }
+
+    .shot-thumb svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .shot-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .shot-action {
+      width: 30px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      justify-self: start;
+      color: var(--blue);
+      background: transparent;
+      border: 0;
+      border-radius: 50%;
+      line-height: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .shot-action svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .link-popover {
+      position: fixed;
+      z-index: 80;
+      width: min(320px, calc(100vw - 32px));
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .24);
+      border-radius: 12px 4px 12px 4px;
+      box-shadow: 0 16px 36px rgba(22, 38, 90, .18);
+    }
+
+    .scene-context-menu {
+      position: fixed;
+      z-index: 90;
+      width: min(190px, calc(100vw - 32px));
+      padding: 8px;
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .24);
+      border-radius: 12px 4px 12px 4px;
+      box-shadow: 0 16px 36px rgba(22, 38, 90, .18);
+    }
+
+    .scene-context-menu button {
+      width: 100%;
+      min-height: 34px;
+      padding: 7px 9px;
+      color: var(--bad);
+      background: #fff;
+      border: 1px solid rgba(199, 65, 95, .24);
+      border-radius: 8px 3px 8px 3px;
+      font-weight: 900;
+      text-align: left;
+    }
+
+    .shot-progress-summary {
+      display: grid;
+      gap: 8px;
+      margin: -8px 0 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .shot-progress-bar {
+      height: 15px;
+      display: flex;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .18);
+      border-radius: 999px;
+    }
+
+    .shot-progress-segment {
+      min-width: 0;
+      height: 100%;
+    }
+
+    .shot-progress-segment.completed { background: var(--pink); }
+    .shot-progress-segment.animate { background: #ffd66b; }
+    .shot-progress-segment.render { background: #9bc7f5; }
+    .shot-progress-segment.other { background: #fff; }
+
+    .shot-progress-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .shot-progress-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .shot-progress-legend i {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      border: 1px solid rgba(22, 38, 90, .16);
+      border-radius: 50%;
+    }
+
+    .link-popover input {
+      width: 100%;
+      min-height: 34px;
+      padding: 7px 9px;
+      color: var(--blue);
+      border: 1px solid rgba(22, 38, 90, .35);
+      border-radius: 6px 2px 6px 2px;
+      font-weight: 700;
+    }
+
+    .link-popover-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .link-popover-actions button {
+      min-height: 30px;
+      padding: 5px 10px;
+      color: var(--blue);
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .35);
+      border-radius: 7px 2px 7px 2px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .link-popover-actions button:last-child {
+      color: #fff;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .status-tag {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 34px;
+      padding: 6px 8px;
+      border: 1px solid rgba(22, 38, 90, .55);
+      border-radius: 3px;
+      background-color: #e9eff6;
+      color: var(--blue);
+      font-size: clamp(10px, .72vw, 14px);
+      font-weight: 800;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    .status-tag.done { background-color: #e8f6ed; }
+    .status-tag.review { background-color: #ffe9f2; }
+    .status-tag.render { background-color: #fff1c8; }
+    .status-tag.waiting { background-color: #eaf0fb; }
+    .status-tag.ongoing { background-color: #e8f2ff; }
+    .status-tag.pending { background-color: #fff4dd; }
+    .status-tag.blocked { background-color: #fde8ee; }
+    .status-tag.not-started { background-color: #eef0f4; }
+    .status-tag.sent { background-color: #e8f6ed; }
+    .status-tag.no-file { background-color: #f4f5f7; }
+    .status-tag.working { background-color: #e8f2ff; }
+
+    .take-row select.status-tag.done:not(:focus):not(:active) { background-color: #e8f6ed; }
+    .take-row select.status-tag.review:not(:focus):not(:active) { background-color: #ffe9f2; }
+    .take-row select.status-tag.render:not(:focus):not(:active) { background-color: #fff1c8; }
+    .take-row select.status-tag.waiting:not(:focus):not(:active) { background-color: #eaf0fb; }
+    .take-row select.status-tag.ongoing:not(:focus):not(:active) { background-color: #e8f2ff; }
+    .take-row select.status-tag.pending:not(:focus):not(:active) { background-color: #fff4dd; }
+    .take-row select.status-tag.blocked:not(:focus):not(:active) { background-color: #fde8ee; }
+    .take-row select.status-tag.not-started:not(:focus):not(:active) { background-color: #eef0f4; }
+    .take-row select.status-tag.sent:not(:focus):not(:active) { background-color: #e8f6ed; }
+    .take-row select.status-tag.no-file:not(:focus):not(:active) { background-color: #f4f5f7; }
+    .take-row select.status-tag.working:not(:focus):not(:active) { background-color: #e8f2ff; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: none;
+      place-items: center;
+      padding: 28px;
+      background: rgba(5, 12, 36, .58);
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-backdrop.open { display: grid; }
+
+    .project-wizard {
+      width: min(980px, 100%);
+      max-height: min(820px, calc(100vh - 56px));
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .18);
+      border-radius: 24px 8px 24px 8px;
+      box-shadow: 0 28px 80px rgba(5, 12, 36, .34);
+    }
+
+    .wizard-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 22px 24px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wizard-head h2 {
+      margin: 3px 0 4px;
+      color: var(--blue);
+      font-size: 28px;
+    }
+
+    .wizard-head p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .wizard-close {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .24);
+      border-radius: 10px 3px 10px 3px;
+      cursor: pointer;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .wizard-steps {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      padding: 14px 24px;
+      background: #f8f9fb;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wizard-step-pill {
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      color: var(--muted);
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .18);
+      border-radius: 14px 4px 14px 4px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .wizard-step-pill span {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--blue);
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .wizard-step-pill.active {
+      color: var(--blue);
+      border-color: var(--pink);
+      box-shadow: 0 0 0 1px rgba(236, 57, 131, .18);
+    }
+
+    .wizard-body {
+      overflow: auto;
+      padding: 24px;
+    }
+
+    .wizard-step { display: none; }
+    .wizard-step.active { display: block; }
+
+    .wizard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .wizard-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .wizard-field.full { grid-column: 1 / -1; }
+
+    .wizard-field label,
+    .stage-check strong {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .wizard-field input,
+    .wizard-field select {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      color: var(--blue);
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .24);
+      border-radius: 10px 3px 10px 3px;
+      font: inherit;
+      font-weight: 750;
+    }
+
+    .field-note {
+      margin-top: 6px;
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .cover-preview {
+      min-height: 158px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      background: #f4f5f7;
+      border: 1px solid rgba(22, 38, 90, .16);
+      border-radius: 18px 6px 18px 6px;
+      overflow: hidden;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .cover-preview.drag-over,
+    .cover-preview:focus-visible {
+      border-color: var(--pink);
+      box-shadow: 0 0 0 3px rgba(236, 57, 131, .16);
+      outline: 0;
+    }
+
+    .cover-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .stage-list-editor,
+    .crew-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .stage-check,
+    .crew-row {
+      display: grid;
+      grid-template-columns: 38px minmax(160px, 1fr) minmax(140px, .7fr);
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .18);
+      border-radius: 14px 4px 14px 4px;
+    }
+
+    .stage-check input[type="checkbox"] {
+      width: 28px;
+      height: 28px;
+      accent-color: var(--pink);
+    }
+
+    .crew-row {
+      grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) 34px;
+    }
+
+    .wizard-foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 16px 24px;
+      background: #fff;
+      border-top: 1px solid var(--line);
+    }
+
+    .wizard-foot .btn {
+      min-width: 118px;
+    }
+
+    .status-dot {
+      width: 10px;
+      aspect-ratio: 1;
+      display: inline-block;
+      border-radius: 50%;
+      background: var(--ok);
+    }
+
+    .status-dot.warn { background: var(--warn); }
+    .status-dot.bad { background: var(--bad); }
+
+    .decor {
+      width: 72px;
+      opacity: .95;
+      filter: drop-shadow(3px 4px 0 rgba(22, 38, 90, .14));
+    }
+
+    @media (max-width: 1180px) {
+      .metric-grid,
+      .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .detail-layout { grid-template-columns: 1fr; }
+      .take-header,
+      .take-row {
+        grid-template-columns: 34px .65fr 1.1fr 1.05fr .34fr .82fr .82fr .82fr .82fr .34fr .9fr;
+      }
+      .take-row { padding-inline: 10px; }
+      .take-row input,
+      .take-row select,
+      .status-tag { padding-inline: 6px; }
+    }
+
+    @media (max-width: 820px) {
+      .app,
+      .app.collapsed { grid-template-columns: 1fr; }
+      aside {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 6px solid var(--pink);
+      }
+      .app.collapsed .nav-label,
+      .app.collapsed .user-details,
+      .app.collapsed .collapse-label { display: block; }
+      .brand { min-height: 80px; }
+      nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .app.collapsed .nav-btn,
+      .nav-btn { grid-template-columns: 30px 1fr; justify-items: start; }
+      .topbar { display: grid; }
+      .top-actions { justify-content: flex-start; }
+      .metric-grid,
+      .project-grid,
+      .board,
+      .mini-grid { grid-template-columns: 1fr; }
+      .scene-sheet summary {
+        grid-template-columns: 22px 1fr;
+      }
+      .scene-sheet summary .scene-stat,
+      .scene-sheet summary .stage { display: none; }
+      .scene-body {
+        padding: 0 12px 18px;
+        overflow-x: visible;
+      }
+      .shot-table { min-width: 0; }
+      .take-row {
+        grid-template-columns: 82px minmax(0, 1fr);
+        border-radius: 16px 6px 16px 6px;
+      }
+      .take-row > * + * { border-left: 0; }
+      .take-header { display: none; }
+      .take-row .shot-action,
+      .take-row .status-tag,
+      .take-row input[data-field="comments"] { display: none; }
+      .shot-thumb {
+        width: 70px;
+        margin-left: 0;
+      }
+      .filters,
+      .filters input,
+      .filters select { width: 100%; }
+      .time-item { grid-template-columns: 1fr; }
+      .wizard-grid,
+      .wizard-steps,
+      .stage-check,
+      .crew-row { grid-template-columns: 1fr; }
+      .modal-backdrop { padding: 14px; }
+      .wizard-head,
+      .wizard-body,
+      .wizard-foot { padding-inline: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <aside>
+      <div class="brand">
+        <img src="assets/sagui-logo.svg" alt="Sagui Studio">
+      </div>
+
+      <button class="collapse" id="collapseBtn" type="button" title="Collapse or expand menu">
+        <span id="collapseIcon">‹</span>
+      </button>
+
+      <nav aria-label="Main navigation">
+        <div class="nav-group">
+          <div class="nav-heading">Production</div>
+          <button class="nav-btn active" data-section="dashboard">
+            <span class="nav-icon" data-icon="dashboard"></span>
+            <span class="nav-label">Dashboard</span>
+          </button>
+          <button class="nav-btn" data-section="projects">
+            <span class="nav-icon" data-icon="notebook"></span>
+            <span class="nav-label">Projects</span>
+          </button>
+          <button class="nav-btn" data-section="shots">
+            <span class="nav-icon" data-icon="frames"></span>
+            <span class="nav-label">Shots</span>
+          </button>
+          <button class="nav-btn" data-section="timeline">
+            <span class="nav-icon" data-icon="calendar"></span>
+            <span class="nav-label">Timeline</span>
+          </button>
+        </div>
+        <div class="nav-group">
+          <div class="nav-heading">Finances</div>
+          <button class="nav-btn" data-section="payments">
+            <span class="nav-icon" data-icon="wallet"></span>
+            <span class="nav-label">Payments</span>
+          </button>
+          <button class="nav-btn" data-section="quotation">
+            <span class="nav-icon" data-icon="calculator"></span>
+            <span class="nav-label">Quotation generator</span>
+          </button>
+          <button class="nav-btn" data-section="accounting">
+            <span class="nav-icon" data-icon="ledger"></span>
+            <span class="nav-label">Accounting</span>
+          </button>
+        </div>
+        <div class="nav-group">
+          <div class="nav-heading">Team</div>
+          <button class="nav-btn" data-section="members">
+            <span class="nav-icon" data-icon="user"></span>
+            <span class="nav-label">Members</span>
+          </button>
+          <button class="nav-btn" data-section="credits">
+            <span class="nav-icon" data-icon="flag"></span>
+            <span class="nav-label">Credits</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="user">
+        <div class="avatar">GV</div>
+        <div class="user-details">
+          <strong>Gabriel Vieira</strong>
+          <span>Director · Sagui Studio</span>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <p class="kicker">Sagui Studio · Production command center</p>
+          <h1>Track films, reels, scenes, and shots without drowning in spreadsheets.</h1>
+          <p>A lean prototype focused only on production management: project overview, pipeline progress, shot tracking, weekly timeline, and status risks.</p>
+        </div>
+        <div class="top-actions">
+          <button class="btn" id="resetBtn" type="button">Reset demo</button>
+          <button class="btn primary" id="saveBtn" type="button">Save</button>
+        </div>
+      </header>
+
+      <section id="dashboard" class="section active">
+        <div class="metric-grid" id="overviewMetrics"></div>
+        <div class="toolbar">
+          <strong>Active projects</strong>
+          <div class="filters">
+            <button class="btn primary" id="newProjectBtn" type="button">New Project</button>
+            <select id="projectFilter" aria-label="Filter projects">
+              <option value="all">All statuses</option>
+              <option value="on">On track</option>
+              <option value="attention">Needs attention</option>
+              <option value="late">Late</option>
+            </select>
+          </div>
+        </div>
+        <div class="project-grid" id="projectGrid"></div>
+      </section>
+
+      <section id="projects" class="section">
+        <div class="toolbar">
+          <div class="filters">
+            <select id="detailProject"></select>
+          </div>
+          <button class="btn primary" data-jump="shots" type="button">Open shot tracker</button>
+        </div>
+        <div class="detail-layout">
+          <div>
+            <div class="panel">
+              <h2 id="detailTitle">Project</h2>
+              <div class="mini-grid" id="detailMeta"></div>
+            </div>
+            <div class="panel">
+              <h2>Pipeline progress</h2>
+              <div class="stage-list" id="detailPipeline"></div>
+            </div>
+          </div>
+          <div>
+            <div class="panel">
+              <h2>Next production alerts</h2>
+              <div id="detailAlerts"></div>
+            </div>
+            <div class="panel">
+              <h2>Key milestones</h2>
+              <div class="timeline" id="detailTimeline"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="shots" class="section">
+        <div class="metric-grid" id="shotMetrics"></div>
+        <div id="shotProgressSummary"></div>
+        <div class="toolbar">
+          <div class="filters">
+            <select id="shotProject"></select>
+            <select id="shotStatus">
+              <option value="all">All statuses</option>
+              <option value="Approved">Approved</option>
+              <option value="In progress">In progress</option>
+              <option value="Review">Review</option>
+              <option value="Render pending">Render pending</option>
+            </select>
+            <select id="shotArtist"></select>
+            <input id="shotSearch" placeholder="Search scene, shot, artist, file">
+          </div>
+          <div class="filters">
+            <button class="btn icon-btn" id="expandAllShotsBtn" type="button" aria-label="Expand all scenes" title="Expand all scenes" data-icon="expand"></button>
+            <button class="btn icon-btn" id="collapseAllShotsBtn" type="button" aria-label="Collapse all scenes" title="Collapse all scenes" data-icon="collapse"></button>
+            <button class="btn primary" id="addShotBtn" type="button">Add Scene</button>
+          </div>
+        </div>
+        <div class="shot-sheet" id="shotSheet"></div>
+      </section>
+
+      <section id="timeline" class="section">
+        <div class="toolbar">
+          <strong>Studio timeline</strong>
+          <div class="filters">
+            <select id="timelineProject">
+              <option value="all">All projects</option>
+            </select>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Weekly and reel-based milestones</h2>
+          <div class="timeline" id="studioTimeline"></div>
+        </div>
+      </section>
+
+      <section id="payments" class="section"></section>
+      <section id="quotation" class="section"></section>
+      <section id="accounting" class="section"></section>
+      <section id="members" class="section"></section>
+      <section id="credits" class="section"></section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="projectWizardModal" aria-hidden="true">
+    <form class="project-wizard" id="projectWizard" aria-label="Create new project">
+      <div class="wizard-head">
+        <div>
+          <p class="kicker">New production</p>
+          <h2>Create new project</h2>
+          <p>Set up the project basics first. Details can evolve as production moves.</p>
+        </div>
+        <button class="wizard-close" id="closeProjectWizard" type="button" aria-label="Close project wizard">×</button>
+      </div>
+
+      <div class="wizard-steps" aria-label="Project creation steps">
+        <div class="wizard-step-pill active" data-wizard-pill="0"><span>1</span>Info</div>
+        <div class="wizard-step-pill" data-wizard-pill="1"><span>2</span>Timeline</div>
+        <div class="wizard-step-pill" data-wizard-pill="2"><span>3</span>Finance</div>
+        <div class="wizard-step-pill" data-wizard-pill="3"><span>4</span>Crew</div>
+      </div>
+
+      <div class="wizard-body">
+        <section class="wizard-step active" data-wizard-step="0">
+          <div class="wizard-grid">
+            <div class="wizard-field">
+              <label for="newProjectName">Project name</label>
+              <input id="newProjectName" required placeholder="Project title">
+            </div>
+            <div class="wizard-field">
+              <label for="newProjectInitials">Project initials</label>
+              <input id="newProjectInitials" maxlength="4" placeholder="SNE" aria-describedby="newProjectInitialsNote">
+              <span class="field-note" id="newProjectInitialsNote">Maximum of 4 characters. Used for scene codes, for example SNE_SC01_TK_001.</span>
+            </div>
+            <div class="wizard-field">
+              <label for="newProjectType">Type of project</label>
+              <select id="newProjectType">
+                <option>Animated short film</option>
+                <option>Series episode</option>
+                <option>Animation teaser</option>
+                <option>VFX project</option>
+                <option>Commercial film</option>
+                <option>Internal development</option>
+              </select>
+            </div>
+            <div class="wizard-field full">
+              <label for="newProjectCoverFile">Project background cover</label>
+              <input id="newProjectCoverFile" type="file" accept="image/*" hidden>
+              <div class="cover-preview" id="newProjectCoverPreview" role="button" tabindex="0">Click to upload or drag image over</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="wizard-step" data-wizard-step="1">
+          <div class="wizard-grid">
+            <div class="wizard-field">
+              <label for="newProjectStart">Start date</label>
+              <input id="newProjectStart" type="date">
+            </div>
+            <div class="wizard-field">
+              <label for="newProjectDelivery">Delivery date</label>
+              <input id="newProjectDelivery" type="date" required>
+            </div>
+            <div class="wizard-field full">
+              <label>Production stages</label>
+              <div class="stage-list-editor" id="wizardStageList"></div>
+              <button class="btn" id="addWizardStage" type="button">Add stage</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="wizard-step" data-wizard-step="2">
+          <div class="wizard-grid">
+            <div class="wizard-field">
+              <label for="newProjectBudget">Estimated budget</label>
+              <input id="newProjectBudget" type="number" min="0" step="100" placeholder="0">
+            </div>
+            <div class="wizard-field">
+              <label for="newProjectFunding">Funding type</label>
+              <select id="newProjectFunding">
+                <option>Client funded</option>
+                <option>Public grant</option>
+                <option>Studio funded</option>
+                <option>Co-production</option>
+                <option>Mixed funding</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="wizard-step" data-wizard-step="3">
+          <div class="wizard-field full">
+            <label>Assign members and roles</label>
+            <div class="crew-list" id="wizardCrewList"></div>
+            <button class="btn" id="addWizardCrew" type="button">Add member</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="wizard-foot">
+        <button class="btn" id="wizardBack" type="button">Back</button>
+        <button class="btn" id="wizardSkip" type="button">Skip</button>
+        <button class="btn primary" id="wizardNext" type="button">Next</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const storeKey = "sagui-production-manager-v4";
+    const today = new Date("2026-05-02T12:00:00");
+
+    const icons = {
+      dashboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h7V4H4z"/><path d="M13 20h7V4h-7z"/><path d="M4 20h7v-5H4z"/></svg>',
+      notebook: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z"/><path d="M8 3v18"/><path d="M12 8h4"/><path d="M12 12h5"/></svg>',
+      calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v4"/><path d="M17 3v4"/><path d="M4 9h16"/><path d="M5 5h14a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1z"/></svg>',
+      frames: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"/><path d="M8 6v12"/><path d="M16 6v12"/><path d="M4 10h4"/><path d="M16 10h4"/><path d="M4 14h4"/><path d="M16 14h4"/></svg>',
+      wallet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v12H4z"/><path d="M16 11h4v4h-4z"/><path d="M4 7l12-3 2 3"/></svg>',
+      calculator: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01"/></svg>',
+      ledger: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6z"/><path d="M9 7h6"/><path d="M9 11h6"/><path d="M9 15h4"/></svg>',
+      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+      alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20z"/><path d="M12 9v5"/><path d="M12 17h.01"/></svg>',
+      progress: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 1-9 9"/><path d="M12 3v9h9"/></svg>',
+      clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+      flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h12l-2 4 2 4H5"/></svg>',
+      plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
+      expand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5"/><path d="M16 3h5v5"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/><path d="m3 3 7 7"/><path d="m21 3-7 7"/><path d="m21 21-7-7"/><path d="m3 21 7-7"/></svg>',
+      collapse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v7H3"/><path d="M14 3v7h7"/><path d="M14 21v-7h7"/><path d="M10 21v-7H3"/><path d="m3 10 7-7"/><path d="m21 10-7-7"/><path d="m21 14-7 7"/><path d="m3 14 7 7"/></svg>'
+    };
+
+    const seedData = {
+      projects: [
+        {
+          id: "amadeo",
+          name: "Amadeo",
+          type: "Animated short film",
+          deadline: "2026-02-20",
+          phase: "Animation and render",
+          status: "attention",
+          pipeline: { Script: 100, Storyboard: 100, Animatic: 95, Design: 90, Modeling: 75, "Rig/setup": 68, Animation: 38, Sync: 42, Render: 18, Delivery: 0 },
+          timeline: [
+            ["Apr 2025", "Render corrections for reels 1 and 2", 100],
+            ["May 2025", "Animation rough pass for reels 4 and 5", 85],
+            ["Jun 2025", "Setup and render for reel 3", 74],
+            ["Jul 2025", "Animation corrections for reels 2 and 3", 52],
+            ["Aug 2025", "Backgrounds and cut-out animation for reels 4 and 5", 36],
+            ["Sep 2025", "Reel 4 render and general review", 22]
+          ]
+        },
+        {
+          id: "joao",
+          name: "João e os Feijões Mágicos",
+          type: "Animated short in pre-production",
+          deadline: "2026-08-30",
+          phase: "Script and planning",
+          status: "on",
+          pipeline: { Script: 62, Storyboard: 18, Animatic: 0, Design: 22, Modeling: 0, "Rig/setup": 0, Animation: 0, Sync: 0, Render: 0, Delivery: 0 },
+          timeline: [
+            ["May 2024", "Contracts and script start", 100],
+            ["Jun 2024", "Visual research and first script version", 72],
+            ["Jul 2024", "Script revision and executive production", 58],
+            ["Aug 2024", "Pre-production wrap-up", 32]
+          ]
+        },
+        {
+          id: "croc",
+          name: "CROC Teaser",
+          type: "Animation teaser",
+          deadline: "2026-06-15",
+          phase: "Shot finaling",
+          status: "late",
+          pipeline: { Script: 100, Storyboard: 100, Animatic: 100, Design: 100, Modeling: 100, "Rig/setup": 92, Animation: 76, Sync: 70, Render: 48, Delivery: 15 },
+          timeline: [
+            ["Scene 1", "Family introduction and Croc reveal", 88],
+            ["Scene 2", "Truck crossing the bridge and city arrival", 62],
+            ["Scene 3", "Joe and the Jump Krocodile song", 78],
+            ["Scene 4", "Kitchen and family presentation", 55],
+            ["Scene 5", "School and classroom shots", 42],
+            ["Scene 6", "Final photo", 35]
+          ]
+        }
+      ],
+      shots: [
+        { id: "s1", project: "croc", scene: "Scene 1", code: "CROC_C01_P001", seconds: 3, description: "Honey pushes Pac while searching", artist: "Murilo", start: "2025-11-01", end: "2025-11-29", animStatus: "Approved", renderStatus: "Sent", file: "LINK", comments: "Render Honey and Pac together again; include background." },
+        { id: "s2", project: "croc", scene: "Scene 1", code: "CROC_C01_P002", seconds: 4, description: "Lily enters looking for Croc", artist: "Jairo", start: "2025-11-03", end: "", animStatus: "In progress", renderStatus: "Render pending", file: "LINK", comments: "Review entrance timing." },
+        { id: "s3", project: "croc", scene: "Scene 1", code: "CROC_C01_P003", seconds: 6, description: "Bill enters calling Croc", artist: "Jairo", start: "2025-11-05", end: "2025-11-06", animStatus: "Approved", renderStatus: "Sent", file: "LINK", comments: "Add shadows to all characters." },
+        { id: "s4", project: "croc", scene: "Scene 1", code: "CROC_C01_P004", seconds: 24, description: "Croc introduces himself and the family", artist: "Dani Souza", start: "2025-11-07", end: "", animStatus: "Review", renderStatus: "Render pending", file: "LINK", comments: "Bill arm adjustment; render characters together." },
+        { id: "s5", project: "croc", scene: "Scene 1", code: "CROC_C01_P005", seconds: 2, description: "Family photo pose", artist: "Gabriel Vieira", start: "2025-11-08", end: "2025-11-10", animStatus: "Approved", renderStatus: "Sent", file: "LINK", comments: "OK paid in original control sheet." },
+        { id: "s6", project: "croc", scene: "Scene 2", code: "CROC_C02_P001", seconds: 3, description: "Truck crosses the bridge", artist: "Gabriel Vieira", start: "2025-11-11", end: "", animStatus: "In progress", renderStatus: "Waiting", file: "LINK", comments: "Check camera movement and background parallax." },
+        { id: "s7", project: "croc", scene: "Scene 2", code: "CROC_C02_P002", seconds: 4, description: "Truck front view while moving", artist: "Gabriel Vieira", start: "2025-11-12", end: "", animStatus: "In progress", renderStatus: "Waiting", file: "LINK", comments: "Render truck and characters together." },
+        { id: "s8", project: "croc", scene: "Scene 2", code: "CROC_C02_P003", seconds: 5, description: "Bill drives while Honey reads the map", artist: "Dani Souza", start: "2025-11-13", end: "", animStatus: "Review", renderStatus: "Render pending", file: "LINK", comments: "Separate map layer and adjust hand pose." },
+        { id: "s9", project: "croc", scene: "Scene 2", code: "CROC_C02_P004", seconds: 4, description: "Croc watches the trees through the car window", artist: "Jairo", start: "2025-11-15", end: "", animStatus: "Not started", renderStatus: "Waiting", file: "LINK", comments: "Needs window reflection pass." },
+        { id: "s10", project: "croc", scene: "Scene 2", code: "CROC_C02_P005", seconds: 4, description: "Croc smiles when seeing the city", artist: "Murilo", start: "", end: "", animStatus: "Not started", renderStatus: "Waiting", file: "LINK", comments: "Pending blocking." },
+        { id: "s11", project: "croc", scene: "Scene 2", code: "CROC_C02_P006", seconds: 3, description: "Truck leaves camera, revealing the road sign", artist: "Murilo", start: "", end: "", animStatus: "Not started", renderStatus: "Waiting", file: "LINK", comments: "Background and sign need final render setup." },
+        { id: "s12", project: "croc", scene: "Scene 3", code: "CROC_C03_P009", seconds: 2, description: "Croc shouts Jump Krocodile", artist: "Everton Amorim", start: "2025-11-18", end: "2025-11-20", animStatus: "Approved", renderStatus: "Sent", file: "LINK", comments: "OK - 20/11." },
+        { id: "s13", project: "croc", scene: "Scene 4", code: "CROC_C04_P007", seconds: 5, description: "Joe asks if Lilly wants to hear the song", artist: "Dani Souza", start: "2025-11-21", end: "", animStatus: "Review", renderStatus: "Waiting", file: "LINK", comments: "Separate counter from Honey; character shadows." },
+        { id: "s14", project: "amadeo", scene: "Reel 4", code: "AMA_R04_P012", seconds: 8, description: "Animation rough pass block", artist: "Gabriel Vieira", start: "2025-05-12", end: "", animStatus: "In progress", renderStatus: "Waiting", file: "TOONBOOM", comments: "Priority for reel lock." },
+        { id: "s15", project: "amadeo", scene: "Reel 3", code: "AMA_R03_P027", seconds: 11, description: "Render correction with characters and BG", artist: "Flávio Veras", start: "2025-06-10", end: "", animStatus: "Approved", renderStatus: "Render pending", file: "DRIVE", comments: "Render separated: BG and characters." }
+      ]
+    };
+
+    let data = loadData();
+    const selectedShotIds = new Set();
+    let selectedThumbnailShotId = "";
+    let wizardStep = 0;
+    const defaultProjectStages = ["Concept", "Script", "Storyboard", "Design", "Rig", "Animation", "Sync", "Render", "Delivery"];
+
+    function loadData() {
+      const stored = localStorage.getItem(storeKey);
+      return stored ? JSON.parse(stored) : structuredClone(seedData);
+    }
+
+    function saveData(showToast = true) {
+      localStorage.setItem(storeKey, JSON.stringify(data));
+      if (showToast) toast("Saved in this browser.");
+    }
+
+    function toast(message) {
+      const old = document.querySelector(".toast");
+      if (old) old.remove();
+      const el = document.createElement("div");
+      el.className = "toast";
+      el.textContent = message;
+      Object.assign(el.style, {
+        position: "fixed", right: "18px", bottom: "18px", zIndex: 100,
+        padding: "12px 14px", color: "#fff", background: "#16265A",
+        border: "1px solid #EC3983", borderRadius: "18px 7px 18px 7px",
+        boxShadow: "0 14px 34px rgba(22,38,90,.24)", fontWeight: "900"
+      });
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2200);
+    }
+
+    function projectName(id) {
+      return data.projects.find(project => project.id === id)?.name || id;
+    }
+
+    function completion(project) {
+      const values = Object.values(project.pipeline);
+      return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+    }
+
+    function formatDate(value) {
+      return new Date(value + "T12:00:00").toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    }
+
+    function statusBadge(status) {
+      const map = {
+        on: ["ok", "On track"],
+        attention: ["warn", "Needs attention"],
+        late: ["bad", "Late"]
+      };
+      const [className, label] = map[status] || ["info", status];
+      return `<span class="badge ${className}">${label}</span>`;
+    }
+
+    function icon(name) {
+      return icons[name] || icons.dashboard;
+    }
+
+    function renderDashboard() {
+      const filter = document.getElementById("projectFilter").value;
+      const projects = data.projects.filter(project => filter === "all" || project.status === filter);
+      const avg = Math.round(data.projects.reduce((sum, project) => sum + completion(project), 0) / data.projects.length);
+      const openShots = data.shots.filter(shot => shot.animStatus !== "Approved" || ["Waiting", "Render pending"].includes(shot.renderStatus)).length;
+      const approvedSeconds = data.shots.filter(shot => shot.animStatus === "Approved").reduce((sum, shot) => sum + Number(shot.seconds || 0), 0);
+      const nextProject = [...data.projects].sort((a, b) => new Date(a.deadline) - new Date(b.deadline))[0];
+
+      document.getElementById("overviewMetrics").innerHTML = [
+        metric("Active projects", data.projects.length, "Productions currently tracked", "notebook"),
+        metric("Average progress", `${avg}%`, "Across all pipeline stages", "progress"),
+        metric("Open shots", openShots, "Animation, review or render still open", "frames"),
+        metric("Next deadline", formatDate(nextProject.deadline), nextProject.name, "calendar")
+      ].join("");
+
+      document.getElementById("projectGrid").innerHTML = projects.map(projectCard).join("");
+      document.querySelectorAll("[data-open-project]").forEach(button => {
+        button.addEventListener("click", () => {
+          document.getElementById("detailProject").value = button.dataset.openProject;
+          switchSection("projects");
+          renderProjectDetail();
+        });
+      });
+    }
+
+    function metric(label, value, note, iconName) {
+      return `
+        <article class="metric">
+          <span class="box-icon">${icon(iconName)}</span>
+          <div>
+            <span>${label}</span>
+            <strong>${value}</strong>
+            <p>${note}</p>
+          </div>
+        </article>
+      `;
+    }
+
+    function projectCard(project) {
+      const done = completion(project);
+      const projectShots = data.shots.filter(shot => shot.project === project.id);
+      const openShots = projectShots.filter(shot => shot.animStatus !== "Approved" || ["Waiting", "Render pending"].includes(shot.renderStatus)).length;
+      const stageRows = Object.entries(project.pipeline).slice(-5).map(([name, value]) => stageRow(name, value)).join("");
+      return `
+        <article class="project-card">
+          ${projectThumb(project)}
+          <div class="card-head">
+            <div>
+              <h2>${project.name}</h2>
+              <span class="type">Main Director: ${mainDirector(project)}</span>
+              <span class="type">${project.type} · ${project.phase}</span>
+            </div>
+            ${statusBadge(project.status)}
+          </div>
+          <div class="stage" style="grid-template-columns:108px 1fr 42px">
+            <span>Overall</span>
+            <div class="progress"><div class="bar" style="--value:${done}%"></div></div>
+            <strong>${done}%</strong>
+          </div>
+          <div class="stage-list">${stageRows}</div>
+          <div class="mini-grid">
+            <div class="mini"><span>Deadline</span><strong>${icon("calendar")}${formatDate(project.deadline)}</strong></div>
+            <div class="mini"><span>Shots</span><strong>${icon("frames")}${projectShots.length}</strong></div>
+            <div class="mini"><span>Open</span><strong>${icon("alert")}${openShots}</strong></div>
+          </div>
+          <button class="btn primary" data-open-project="${project.id}" type="button">View project</button>
+        </article>
+      `;
+    }
+
+    function projectThumb(project) {
+      return project.thumbnail
+        ? `<div class="project-thumb"><img src="${escapeAttr(project.thumbnail)}" alt="${escapeAttr(project.name)} preview"></div>`
+        : `<div class="project-thumb">${project.name} preview</div>`;
+    }
+
+    function mainDirector(project) {
+      const director = project.mainDirector || project.crew?.find(person => /director/i.test(person.role))?.member;
+      if (director) return director;
+      return project.id === "croc" ? "Everton Amorim" : "Gabriel Vieira";
+    }
+
+    function stageRow(name, value) {
+      return `<div class="stage"><span>${name}</span><div class="progress"><div class="bar" style="--value:${value}%"></div></div><strong>${value}%</strong></div>`;
+    }
+
+    function fillProjectSelects() {
+      const options = data.projects.map(project => `<option value="${project.id}">${project.name}</option>`).join("");
+      ["detailProject", "shotProject"].forEach(id => {
+        const current = document.getElementById(id).value;
+        document.getElementById(id).innerHTML = options;
+        if (current) document.getElementById(id).value = current;
+      });
+      const timelineCurrent = document.getElementById("timelineProject").value;
+      document.getElementById("timelineProject").innerHTML = `<option value="all">All projects</option>${options}`;
+      if (timelineCurrent) document.getElementById("timelineProject").value = timelineCurrent;
+    }
+
+    function renderProjectDetail() {
+      const id = document.getElementById("detailProject").value || data.projects[0].id;
+      const project = data.projects.find(item => item.id === id);
+      const projectShots = data.shots.filter(shot => shot.project === id);
+      const reviewCount = projectShots.filter(shot => shot.animStatus === "Review").length;
+      const renderPending = projectShots.filter(shot => shot.renderStatus === "Render pending").length;
+      const approvedSeconds = projectShots.filter(shot => shot.animStatus === "Approved").reduce((sum, shot) => sum + Number(shot.seconds || 0), 0);
+
+      document.getElementById("detailTitle").textContent = `${project.name} · ${completion(project)}% complete`;
+      document.getElementById("detailMeta").innerHTML = `
+        <div class="mini"><span>Type</span><strong>${icon("notebook")}${project.type}</strong></div>
+        <div class="mini"><span>Current phase</span><strong>${icon("progress")}${project.phase}</strong></div>
+        <div class="mini"><span>Deadline</span><strong>${icon("calendar")}${formatDate(project.deadline)}</strong></div>
+      `;
+      document.getElementById("detailPipeline").innerHTML = Object.entries(project.pipeline).map(([name, value]) => stageRow(name, value)).join("");
+      document.getElementById("detailAlerts").innerHTML = [
+        alertLine(reviewCount, "shots waiting for review", reviewCount ? "warn" : ""),
+        alertLine(renderPending, "shots with render pending", renderPending ? "bad" : ""),
+        alertLine(`${approvedSeconds}s`, "approved animation duration", "")
+      ].join("");
+      document.getElementById("detailTimeline").innerHTML = project.timeline.map(([period, task, progress]) => `
+        <div class="time-item">
+          <span>${period}</span>
+          <strong>${task}</strong>
+          <div class="stage" style="grid-template-columns:1fr 40px"><div class="progress"><div class="bar" style="--value:${progress}%"></div></div><strong>${progress}%</strong></div>
+        </div>
+      `).join("");
+    }
+
+    function alertLine(value, label, tone) {
+      return `<p><span class="status-dot ${tone}"></span> <strong>${value}</strong> ${label}</p>`;
+    }
+
+    function renderShots() {
+      const project = document.getElementById("shotProject").value || data.projects[0].id;
+      const status = document.getElementById("shotStatus").value;
+      const previousArtist = document.getElementById("shotArtist").value || "all";
+      const search = document.getElementById("shotSearch").value.toLowerCase();
+      const artists = [...new Set(data.shots.map(shot => shot.artist))].sort();
+      document.getElementById("shotArtist").innerHTML = `<option value="all">All artists</option>${artists.map(artist => `<option>${artist}</option>`).join("")}`;
+      document.getElementById("shotArtist").value = previousArtist;
+
+      const rows = data.shots.filter(shot => {
+        const text = `${shot.scene} ${shot.code} ${shot.artist} ${shot.file}`.toLowerCase();
+        const statusMatch = status === "all" || shot.animStatus === status || shot.renderStatus === status;
+        const artistMatch = previousArtist === "all" || shot.artist === previousArtist;
+        return shot.project === project && statusMatch && artistMatch && text.includes(search);
+      });
+
+      const seconds = rows.reduce((sum, shot) => sum + Number(shot.seconds || 0), 0);
+      const totalTargetSeconds = 400;
+      const leftToAnimate = Math.max(totalTargetSeconds - seconds, 0);
+      const approved = rows.filter(shot => shot.animStatus === "Approved");
+      document.getElementById("shotMetrics").innerHTML = [
+        metric("Filtered shots", rows.length, projectName(project), "frames"),
+        metric("Approved shots", approved.length, "Animation approved", "check"),
+        metric("Total seconds", `${leftToAnimate}/${totalTargetSeconds} seg`, "Left to animate", "clock"),
+        metric("Render pending", rows.filter(shot => shot.renderStatus === "Render pending").length, "Waiting for final output", "alert")
+      ].join("");
+      document.getElementById("shotProgressSummary").innerHTML = shotProgressSummary(rows);
+
+      const groups = groupByScene(rows);
+      document.getElementById("shotSheet").innerHTML = groups.map((group, index) => {
+        const addScene = index < groups.length - 1 ? sceneAddButton(group.scene) : "";
+        return `${sceneGroup(group)}${addScene}`;
+      }).join("");
+      bindShotInputs();
+      bindShotLinks();
+      bindShotSelection();
+      bindShotDrag();
+      bindThumbnailTargets();
+      bindSceneContextMenus();
+      bindSceneToggles();
+    }
+
+    function shotProgressSummary(rows) {
+      if (!rows.length) return "";
+      const total = rows.length;
+      const render = rows.filter(shot => shot.renderStatus === "Render pending").length;
+      const completed = rows.filter(shot => shot.animStatus === "Approved" && shot.renderStatus !== "Render pending").length;
+      const animate = rows.filter(shot => shot.animStatus !== "Approved" && shot.renderStatus !== "Render pending").length;
+      const other = Math.max(total - completed - render - animate, 0);
+      const segment = (name, count) => count ? `<span class="shot-progress-segment ${name}" style="width:${(count / total) * 100}%"></span>` : "";
+      return `
+        <div class="shot-progress-summary" aria-label="Overall production progress">
+          <div class="shot-progress-bar">
+            ${segment("completed", completed)}
+            ${segment("animate", animate)}
+            ${segment("render", render)}
+            ${segment("other", other)}
+          </div>
+          <div class="shot-progress-legend">
+            <span><i style="background:var(--pink)"></i>${completed} completed</span>
+            <span><i style="background:#ffd66b"></i>${animate} to animate</span>
+            <span><i style="background:#9bc7f5"></i>${render} to render</span>
+            <span><i style="background:#fff"></i>${other} other</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function groupByScene(rows) {
+      const map = new Map();
+      rows.forEach(shot => {
+        if (!map.has(shot.scene)) map.set(shot.scene, []);
+        map.get(shot.scene).push(shot);
+      });
+      return [...map.entries()].map(([scene, shots]) => ({ scene, shots }));
+    }
+
+    function sceneAddButton(afterScene) {
+      return `
+        <div class="scene-insert-zone" aria-label="Add scene area">
+          <button class="add-scene-between" type="button" data-add-scene-after="${escapeAttr(afterScene)}" aria-label="Add scene here" title="Add scene here">
+            ${icon("plus")}
+          </button>
+        </div>
+      `;
+    }
+
+    function sceneGroup(group) {
+      const total = group.shots.length;
+      const approved = group.shots.filter(shot => shot.animStatus === "Approved").length;
+      const progress = total ? Math.round((approved / total) * 100) : 0;
+      const storageKey = `sagui-scene-open-${group.scene}`;
+      const isOpen = localStorage.getItem(storageKey) !== "0";
+      return `
+        <details class="scene-sheet" data-scene="${escapeAttr(group.scene)}" ${isOpen ? "open" : ""}>
+          <summary>
+            <span class="scene-arrow">${chevronIcon()}</span>
+            <span class="scene-title">
+              <span>${group.scene}</span>
+              <small>· Takes ${takeRange(group.shots)} · ${total} takes</small>
+            </span>
+            <span class="scene-stat">Completed</span>
+            <span class="stage" style="grid-template-columns:1fr 42px"><span class="progress"><span class="bar" style="--value:${progress}%"></span></span><strong>${progress}%</strong></span>
+          </summary>
+          <div class="scene-body">
+            <div class="shot-table">
+              <div class="take-header">
+                <span></span>
+                <span>Thumbnail</span>
+                <span>Name</span>
+                <span>Animator</span>
+                <span>Sync</span>
+                <span>Anim</span>
+                <span>Status</span>
+                <span>Render</span>
+                <span>ToonBoom</span>
+                <span>File</span>
+                <span>Remarks</span>
+              </div>
+              ${group.shots.map(shotRow).join("")}
+            </div>
+          </div>
+        </details>
+      `;
+    }
+
+    function shotRow(shot) {
+      const selected = selectedShotIds.has(shot.id) ? " selected" : "";
+      const artists = artistOptions(shot.artist);
+      return `
+        <div class="take-row${selected}" data-shot="${shot.id}" aria-label="Select ${escapeAttr(shot.code)}">
+          <button class="take-move-handle" type="button" draggable="true" aria-label="Drag ${escapeAttr(shot.code)} to reorder" title="Move take">${moveIcon()}</button>
+          ${shotThumb(shot)}
+          <input class="take-code" data-field="code" value="${escapeAttr(shot.code)}" aria-label="Shot code">
+          <select class="status-tag artist-select" data-field="artist" aria-label="Animator">${artists.map(artist => `<option ${artist === shot.artist ? "selected" : ""}>${escapeHtml(artist)}</option>`).join("")}</select>
+          <button class="shot-action" type="button" data-link-field="syncLink" title="Open sync file">${externalIcon()}</button>
+          ${selectField("animStatus", displayAnimStatus(shot.animStatus), ["TO APPROVE", "APPROVED", "ON GOING", "REVIEW", "NOT STARTED"])}
+          ${selectField("status", shot.status || displayProductionStatus(shot), ["ON GOING", "FINISHED", "PENDING", "BLOCKED"])}
+          ${selectField("renderStatus", displayRenderStatus(shot.renderStatus), ["UNDONE", "DONE", "RENDER PENDING", "WAITING", "SENT"])}
+          ${selectField("toonboom", shot.toonboom || displayToonBoomStatus(shot), ["TO SEND", "SENT", "WORKING", "NO FILE"])}
+          <button class="shot-action" type="button" data-link-field="fileLink" title="Open file">${externalIcon()}</button>
+          <input data-field="comments" value="${escapeAttr(shot.comments || "")}" placeholder="Remarks" aria-label="Remarks">
+          <button class="add-take-hover" type="button" data-add-scene="${escapeAttr(shot.scene)}" data-add-after-shot="${escapeAttr(shot.id)}" title="Add take">+</button>
+        </div>
+      `;
+    }
+
+    function displayAnimStatus(value) {
+      return ({
+        "Approved": "APPROVED",
+        "In progress": "ON GOING",
+        "Review": "TO APPROVE",
+        "Not started": "NOT STARTED"
+      })[value] || value || "NOT STARTED";
+    }
+
+    function displayRenderStatus(value) {
+      return ({
+        "Sent": "SENT",
+        "Rendered": "DONE",
+        "Render pending": "RENDER PENDING",
+        "Waiting": "UNDONE"
+      })[value] || value || "UNDONE";
+    }
+
+    function displayProductionStatus(shot) {
+      return shot.animStatus === "Approved" ? "FINISHED" : "ON GOING";
+    }
+
+    function displayToonBoomStatus(shot) {
+      if (!shot.file) return "NO FILE";
+      return shot.renderStatus === "Sent" ? "SENT" : "TO SEND";
+    }
+
+    function externalIcon() {
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M10 14 20 4"/><path d="M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5"/></svg>';
+    }
+
+    function moveIcon() {
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="m8 7 4-4 4 4"/><path d="m8 17 4 4 4-4"/></svg>';
+    }
+
+    function chevronIcon() {
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+    }
+
+    function shotThumb(shot) {
+      const active = selectedThumbnailShotId === shot.id ? " thumbnail-target" : "";
+      return shot.thumbnail
+        ? `<div class="shot-thumb${active}" data-thumbnail-shot="${escapeAttr(shot.id)}"><img src="${escapeAttr(shot.thumbnail)}" alt="${escapeAttr(shot.code)} preview"></div>`
+        : `<div class="shot-thumb${active}" data-thumbnail-shot="${escapeAttr(shot.id)}" aria-label="No thumbnail">${imageIcon()}</div>`;
+    }
+
+    function imageIcon() {
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m7 17 4.2-4.2a1.4 1.4 0 0 1 2 0L17 16.6"/><path d="m14.5 14.5 1.2-1.2a1.4 1.4 0 0 1 2 0L20 15.6"/></svg>';
+    }
+
+    function artistOptions(current) {
+      const artists = [...new Set(data.shots.map(shot => shot.artist).filter(Boolean))].sort();
+      if (current && !artists.includes(current)) artists.unshift(current);
+      if (!artists.includes("To assign")) artists.unshift("To assign");
+      return artists;
+    }
+
+    function takeRange(shots) {
+      const nums = shots.map(shot => Number((shot.code.match(/P(\d+)/i) || [])[1])).filter(Boolean).sort((a, b) => a - b);
+      if (!nums.length) return `1-${shots.length}`;
+      return nums.length === 1 ? `${nums[0]}` : `${nums[0]}-${nums[nums.length - 1]}`;
+    }
+
+    function selectField(field, value, options) {
+      return `<select class="status-tag ${statusClass(value)}" data-field="${field}">${options.map(option => `<option ${option === value ? "selected" : ""}>${option}</option>`).join("")}</select>`;
+    }
+
+    function statusClass(value) {
+      if (["Approved", "Rendered", "APPROVED", "DONE", "FINISHED"].includes(value)) return "done";
+      if (["Sent", "SENT"].includes(value)) return "sent";
+      if (["ON GOING", "In progress"].includes(value)) return "ongoing";
+      if (["Review", "TO APPROVE", "REVIEW"].includes(value)) return "review";
+      if (["Render pending", "RENDER PENDING"].includes(value)) return "render";
+      if (["PENDING"].includes(value)) return "pending";
+      if (["BLOCKED"].includes(value)) return "blocked";
+      if (["NOT STARTED", "Not started"].includes(value)) return "not-started";
+      if (["NO FILE"].includes(value)) return "no-file";
+      if (["WORKING"].includes(value)) return "working";
+      return "waiting";
+    }
+
+    function bindShotInputs() {
+      document.querySelectorAll("#shotSheet [data-field]").forEach(input => {
+        input.addEventListener("change", event => {
+          const row = event.target.closest("[data-shot]");
+          const shot = data.shots.find(item => item.id === row.dataset.shot);
+          const field = event.target.dataset.field;
+          shot[field] = normaliseShotField(field, event.target.value);
+          saveData(false);
+          renderDashboard();
+          renderProjectDetail();
+          renderShots();
+          renderTimeline();
+        });
+      });
+    }
+
+    function bindShotLinks() {
+      document.querySelectorAll("#shotSheet [data-link-field]").forEach(button => {
+        button.addEventListener("contextmenu", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const row = button.closest("[data-shot]");
+          const shot = data.shots.find(item => item.id === row.dataset.shot);
+          if (!shot) return;
+          openLinkEditor(button, shot, button.dataset.linkField);
+        });
+        button.addEventListener("click", event => {
+          const row = button.closest("[data-shot]");
+          const shot = data.shots.find(item => item.id === row.dataset.shot);
+          const link = shot?.[button.dataset.linkField];
+          if (!link) return;
+          event.stopPropagation();
+          window.open(link, "_blank", "noopener");
+        });
+      });
+    }
+
+    function bindThumbnailTargets() {
+      document.querySelectorAll("#shotSheet [data-thumbnail-shot]").forEach(thumb => {
+        thumb.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          selectedThumbnailShotId = thumb.dataset.thumbnailShot;
+          document.querySelectorAll("#shotSheet .shot-thumb.thumbnail-target").forEach(item => item.classList.remove("thumbnail-target"));
+          thumb.classList.add("thumbnail-target");
+        });
+      });
+    }
+
+    function pasteImageIntoSelectedThumbnail(event) {
+      if (!selectedThumbnailShotId || !event.clipboardData?.items?.length) return;
+      const imageItem = [...event.clipboardData.items].find(item => item.type.startsWith("image/"));
+      if (!imageItem) return;
+      const file = imageItem.getAsFile();
+      if (!file) return;
+      event.preventDefault();
+      readImageFile(file, src => {
+        const shot = data.shots.find(item => item.id === selectedThumbnailShotId);
+        if (!shot) return;
+        shot.thumbnail = src;
+        saveData(false);
+        renderShots();
+        toast("Thumbnail updated.");
+      });
+    }
+
+    function readImageFile(file, callback) {
+      const reader = new FileReader();
+      reader.onload = () => callback(reader.result);
+      reader.readAsDataURL(file);
+    }
+
+    function bindSceneContextMenus() {
+      document.querySelectorAll("#shotSheet .scene-sheet summary, #shotSheet .scene-title").forEach(target => {
+        target.addEventListener("contextmenu", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const scene = target.closest(".scene-sheet")?.dataset.scene;
+          if (scene) openSceneMenu(event, scene);
+        });
+      });
+    }
+
+    function openSceneMenu(event, scene) {
+      document.querySelector(".scene-context-menu")?.remove();
+      const menu = document.createElement("div");
+      menu.className = "scene-context-menu";
+      menu.innerHTML = `<button type="button">Delete scene</button>`;
+      document.body.appendChild(menu);
+      menu.style.left = `${Math.min(event.clientX, window.innerWidth - menu.offsetWidth - 16)}px`;
+      menu.style.top = `${Math.min(event.clientY, window.innerHeight - menu.offsetHeight - 16)}px`;
+      menu.querySelector("button").addEventListener("click", () => {
+        deleteScene(scene);
+        menu.remove();
+      });
+      setTimeout(() => {
+        document.addEventListener("pointerdown", function closeSceneMenu(pointerEvent) {
+          if (!menu.contains(pointerEvent.target)) {
+            menu.remove();
+            document.removeEventListener("pointerdown", closeSceneMenu);
+          }
+        });
+      });
+    }
+
+    function deleteScene(scene) {
+      const project = document.getElementById("shotProject").value;
+      data.shots = data.shots.filter(shot => !(shot.project === project && shot.scene === scene));
+      selectedShotIds.clear();
+      if (!data.shots.some(shot => shot.id === selectedThumbnailShotId)) selectedThumbnailShotId = "";
+      localStorage.removeItem(`sagui-scene-open-${scene}`);
+      saveData(false);
+      renderShots();
+      renderDashboard();
+      renderProjectDetail();
+      renderTimeline();
+      toast("Scene deleted.");
+    }
+
+    function openLinkEditor(anchor, shot, field) {
+      document.querySelector(".link-popover")?.remove();
+      const rect = anchor.getBoundingClientRect();
+      const popover = document.createElement("div");
+      popover.className = "link-popover";
+      popover.innerHTML = `
+        <input type="url" value="${escapeAttr(shot[field] || "")}" placeholder="Paste link here" aria-label="Shot link">
+        <div class="link-popover-actions">
+          <button type="button" data-close-link>Cancel</button>
+          <button type="button" data-save-link>Save</button>
+        </div>
+      `;
+      document.body.appendChild(popover);
+      const left = Math.min(rect.left, window.innerWidth - popover.offsetWidth - 16);
+      const top = Math.min(rect.bottom + 8, window.innerHeight - popover.offsetHeight - 16);
+      popover.style.left = `${Math.max(16, left)}px`;
+      popover.style.top = `${Math.max(16, top)}px`;
+      const input = popover.querySelector("input");
+      input.focus();
+      input.select();
+      popover.querySelector("[data-close-link]").addEventListener("click", () => popover.remove());
+      popover.querySelector("[data-save-link]").addEventListener("click", () => {
+        shot[field] = input.value.trim();
+        saveData(false);
+        popover.remove();
+        renderShots();
+      });
+      input.addEventListener("keydown", event => {
+        if (event.key === "Escape") popover.remove();
+        if (event.key === "Enter") popover.querySelector("[data-save-link]").click();
+      });
+      setTimeout(() => {
+        document.addEventListener("pointerdown", function closeLinkEditor(event) {
+          if (!popover.contains(event.target)) {
+            popover.remove();
+            document.removeEventListener("pointerdown", closeLinkEditor);
+          }
+        });
+      });
+    }
+
+    function bindShotSelection() {
+      document.querySelectorAll("#shotSheet .take-row").forEach(row => {
+        row.addEventListener("click", event => {
+          if (isInteractiveCell(event.target)) return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (event.ctrlKey || event.metaKey) {
+            toggleShotSelection(row.dataset.shot, row);
+          } else {
+            const wasSelected = selectedShotIds.has(row.dataset.shot) && selectedShotIds.size === 1;
+            selectedShotIds.clear();
+            document.querySelectorAll("#shotSheet .take-row.selected").forEach(item => item.classList.remove("selected"));
+            if (!wasSelected) {
+              selectedShotIds.add(row.dataset.shot);
+              row.classList.add("selected");
+            }
+          }
+        });
+      });
+    }
+
+    function isInteractiveCell(target) {
+      return Boolean(target.closest("input, select, button, a"));
+    }
+
+    function toggleShotSelection(id, row) {
+      if (selectedShotIds.has(id)) {
+        selectedShotIds.delete(id);
+        row.classList.remove("selected");
+      } else {
+        selectedShotIds.add(id);
+        row.classList.add("selected");
+      }
+    }
+
+    function bindShotDrag() {
+      let draggedId = null;
+
+      document.querySelectorAll("#shotSheet .take-row").forEach(row => {
+        row.addEventListener("dragstart", event => {
+          if (!event.target.closest(".take-move-handle")) {
+            event.preventDefault();
+            return;
+          }
+          draggedId = row.dataset.shot;
+          row.classList.add("dragging");
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", draggedId);
+        });
+
+        row.addEventListener("dragend", () => {
+          draggedId = null;
+          clearDropMarkers();
+          row.classList.remove("dragging");
+        });
+
+        row.addEventListener("dragover", event => {
+          if (!draggedId || draggedId === row.dataset.shot) return;
+          const draggedShot = data.shots.find(shot => shot.id === draggedId);
+          const targetShot = data.shots.find(shot => shot.id === row.dataset.shot);
+          if (!canDropShot(draggedShot, targetShot)) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+          clearDropMarkers(row);
+          row.classList.toggle("drop-before", isBeforeDrop(row, event));
+          row.classList.toggle("drop-after", !isBeforeDrop(row, event));
+        });
+
+        row.addEventListener("dragleave", event => {
+          if (!row.contains(event.relatedTarget)) {
+            row.classList.remove("drop-before", "drop-after");
+          }
+        });
+
+        row.addEventListener("drop", event => {
+          if (!draggedId || draggedId === row.dataset.shot) return;
+          const before = isBeforeDrop(row, event);
+          event.preventDefault();
+          reorderShot(draggedId, row.dataset.shot, before);
+        });
+      });
+    }
+
+    function canDropShot(source, target) {
+      return source && target && source.project === target.project && source.scene === target.scene;
+    }
+
+    function isBeforeDrop(row, event) {
+      const rect = row.getBoundingClientRect();
+      return event.clientY < rect.top + rect.height / 2;
+    }
+
+    function clearDropMarkers(except = null) {
+      document.querySelectorAll("#shotSheet .take-row").forEach(row => {
+        if (row !== except) row.classList.remove("drop-before", "drop-after");
+      });
+    }
+
+    function reorderShot(sourceId, targetId, beforeTarget) {
+      const targetIndex = data.shots.findIndex(shot => shot.id === targetId);
+      const source = data.shots.find(shot => shot.id === sourceId);
+      const target = data.shots[targetIndex];
+      if (!source || targetIndex < 0 || !canDropShot(source, target)) return;
+
+      const selectedGroup = selectedShotIds.has(sourceId)
+        ? data.shots.filter(shot => selectedShotIds.has(shot.id) && canDropShot(shot, target))
+        : [source];
+      if (selectedGroup.some(shot => shot.id === targetId)) return;
+
+      const movedIds = new Set(selectedGroup.map(shot => shot.id));
+      data.shots = data.shots.filter(shot => !movedIds.has(shot.id));
+      const nextTargetIndex = data.shots.findIndex(shot => shot.id === targetId);
+      const insertIndex = beforeTarget ? nextTargetIndex : nextTargetIndex + 1;
+      data.shots.splice(insertIndex, 0, ...selectedGroup);
+      saveData(false);
+      renderShots();
+      renderDashboard();
+      renderProjectDetail();
+      renderTimeline();
+    }
+
+    function normaliseShotField(field, value) {
+      if (field === "seconds") return Number(value);
+      if (field === "animStatus") {
+        return ({
+          "TO APPROVE": "Review",
+          "APPROVED": "Approved",
+          "ON GOING": "In progress",
+          "REVIEW": "Review",
+          "NOT STARTED": "Not started"
+        })[value] || value;
+      }
+      if (field === "renderStatus") {
+        return ({
+          "UNDONE": "Waiting",
+          "DONE": "Rendered",
+          "RENDER PENDING": "Render pending",
+          "WAITING": "Waiting",
+          "SENT": "Sent"
+        })[value] || value;
+      }
+      return value;
+    }
+
+    function bindSceneToggles() {
+      document.querySelectorAll(".scene-sheet").forEach(scene => {
+        scene.addEventListener("toggle", () => {
+          localStorage.setItem(`sagui-scene-open-${scene.dataset.scene}`, scene.open ? "1" : "0");
+        });
+      });
+      document.querySelectorAll("[data-add-scene]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          addShotToScene(document.getElementById("shotProject").value, button.dataset.addScene, button.dataset.addAfterShot);
+        });
+      });
+      document.querySelectorAll("[data-add-scene-after]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          addSceneAfter(document.getElementById("shotProject").value, button.dataset.addSceneAfter);
+        });
+      });
+    }
+
+    function createShot(project, scene, number, code = "") {
+      return {
+        id: `s${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        project,
+        scene,
+        code: code || sceneShotCode(project, scene, number),
+        seconds: 1,
+        artist: "To assign",
+        animStatus: "Not started",
+        renderStatus: "Waiting",
+        file: "",
+        thumbnail: "",
+        comments: ""
+      };
+    }
+
+    function addShotToScene(project, scene, afterShotId = "") {
+      const existing = data.shots.filter(shot => shot.project === project && shot.scene === scene);
+      const next = existing.length + 1;
+      const afterShot = afterShotId ? data.shots.find(item => item.id === afterShotId) : null;
+      const shot = createShot(project, scene, next, afterShot ? continuationCode(afterShot) : "");
+      const afterIndex = afterShotId ? data.shots.findIndex(item => item.id === afterShotId) : -1;
+      if (afterIndex >= 0) {
+        data.shots.splice(afterIndex + 1, 0, shot);
+      } else {
+        data.shots.push(shot);
+      }
+      localStorage.setItem(`sagui-scene-open-${scene}`, "1");
+      saveData(false);
+      renderShots();
+      renderDashboard();
+    }
+
+    function continuationCode(afterShot) {
+      const root = afterShot.code.replace(/\.\d+$/, "");
+      const continuationPattern = new RegExp(`^${escapeRegExp(root)}\\.(\\d+)$`, "i");
+      const next = data.shots
+        .filter(shot => shot.project === afterShot.project && shot.scene === afterShot.scene)
+        .map(shot => Number((shot.code.match(continuationPattern) || [])[1]))
+        .filter(Boolean)
+        .reduce((max, value) => Math.max(max, value), 0) + 1;
+      return `${root}.${next}`;
+    }
+
+    function sceneShotCode(project, scene, number) {
+      const sceneNumber = scene.match(/\d+/)?.[0] || "01";
+      return `${projectCode(project)}_SC${String(sceneNumber).padStart(2, "0")}_TK_${String(number).padStart(3, "0")}`;
+    }
+
+    function projectCode(projectId) {
+      const fallback = { amadeo: "AMA", joao: "JOAO", croc: "CROC" };
+      const project = data.projects.find(item => item.id === projectId);
+      return String(project?.code || fallback[projectId] || projectId).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4) || "PROJ";
+    }
+
+    function escapeRegExp(value) {
+      return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function addSceneAfter(project, afterScene) {
+      const scene = uniqueSceneName(project);
+      const shot = createShot(project, scene, 1);
+      const afterIndex = data.shots.reduce((last, item, index) => {
+        return item.project === project && item.scene === afterScene ? index : last;
+      }, -1);
+      if (afterIndex >= 0) {
+        data.shots.splice(afterIndex + 1, 0, shot);
+      } else {
+        data.shots.push(shot);
+      }
+      localStorage.setItem(`sagui-scene-open-${scene}`, "1");
+      saveData(false);
+      renderShots();
+      renderDashboard();
+      renderProjectDetail();
+      renderTimeline();
+    }
+
+    function uniqueSceneName(project) {
+      const scenes = new Set(data.shots.filter(shot => shot.project === project).map(shot => shot.scene));
+      if (!scenes.has("New scene")) return "New scene";
+      let index = 2;
+      while (scenes.has(`New scene ${index}`)) index += 1;
+      return `New scene ${index}`;
+    }
+
+    function sceneCode(scene) {
+      const number = scene.match(/\d+/)?.[0] || "00";
+      if (/reel/i.test(scene)) return `R${String(number).padStart(2, "0")}`;
+      return `C${String(number).padStart(2, "0")}`;
+    }
+
+    function renderTimeline() {
+      const filter = document.getElementById("timelineProject").value || "all";
+      const projects = data.projects.filter(project => filter === "all" || project.id === filter);
+      const items = projects.flatMap(project => project.timeline.map(item => ({ project, period: item[0], task: item[1], progress: item[2] })));
+      document.getElementById("studioTimeline").innerHTML = items.map(item => `
+        <div class="time-item">
+          <span>${item.period}</span>
+          <strong>${item.project.name}: ${item.task}</strong>
+          <div class="stage" style="grid-template-columns:1fr 40px"><div class="progress"><div class="bar" style="--value:${item.progress}%"></div></div><strong>${item.progress}%</strong></div>
+        </div>
+      `).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char]));
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/\n/g, " ");
+    }
+
+    function switchSection(id) {
+      document.querySelectorAll(".section").forEach(section => section.classList.toggle("active", section.id === id));
+      document.querySelectorAll(".nav-btn").forEach(button => button.classList.toggle("active", button.dataset.section === id));
+      if (id === "dashboard") renderDashboard();
+      if (id === "projects") renderProjectDetail();
+      if (id === "shots") renderShots();
+      if (id === "timeline") renderTimeline();
+    }
+
+    function openProjectWizard() {
+      wizardStep = 0;
+      document.getElementById("projectWizard").reset();
+      document.getElementById("newProjectStart").value = today.toISOString().slice(0, 10);
+      document.getElementById("newProjectDelivery").value = "";
+      document.getElementById("newProjectInitials").value = "";
+      document.getElementById("newProjectCoverPreview").dataset.cover = "";
+      document.getElementById("newProjectCoverPreview").innerHTML = "Click to upload or drag image over";
+      renderWizardStages();
+      renderWizardCrew();
+      renderWizardStep();
+      const modal = document.getElementById("projectWizardModal");
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+      document.getElementById("newProjectName").focus();
+    }
+
+    function closeProjectWizard() {
+      const modal = document.getElementById("projectWizardModal");
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function renderWizardStep() {
+      document.querySelectorAll("[data-wizard-step]").forEach(step => {
+        step.classList.toggle("active", Number(step.dataset.wizardStep) === wizardStep);
+      });
+      document.querySelectorAll("[data-wizard-pill]").forEach(pill => {
+        pill.classList.toggle("active", Number(pill.dataset.wizardPill) === wizardStep);
+      });
+      document.getElementById("wizardBack").style.visibility = wizardStep === 0 ? "hidden" : "visible";
+      document.getElementById("wizardSkip").style.visibility = wizardStep === 3 ? "hidden" : "visible";
+      document.getElementById("wizardNext").textContent = wizardStep === 3 ? "Create project" : "Next";
+    }
+
+    function renderWizardStages() {
+      document.getElementById("wizardStageList").innerHTML = defaultProjectStages.map((stage, index) => stageRowEditor(stage, index < 4)).join("");
+    }
+
+    function stageRowEditor(stage, checked = true) {
+      return `
+        <label class="stage-check">
+          <input type="checkbox" ${checked ? "checked" : ""}>
+          <strong contenteditable="true">${escapeHtml(stage)}</strong>
+          <input type="date" aria-label="${escapeAttr(stage)} target date">
+        </label>
+      `;
+    }
+
+    function renderWizardCrew() {
+      document.getElementById("wizardCrewList").innerHTML = [crewRowEditor("Gabriel Vieira", "Director")].join("");
+    }
+
+    function crewRowEditor(member = "To assign", role = "") {
+      const options = teamMembers().map(name => `<option ${name === member ? "selected" : ""}>${escapeHtml(name)}</option>`).join("");
+      return `
+        <div class="crew-row">
+          <select aria-label="Team member">${options}</select>
+          <input placeholder="Role" value="${escapeAttr(role)}" aria-label="Role">
+          <button class="shot-action" type="button" data-remove-crew aria-label="Remove member">×</button>
+        </div>
+      `;
+    }
+
+    function teamMembers() {
+      const members = new Set(["Gabriel Vieira", "Dani Souza", "Everton Amorim", "Flávio Veras", "Jairo", "Murilo", "To assign"]);
+      data.shots.forEach(shot => { if (shot.artist) members.add(shot.artist); });
+      return [...members].sort((a, b) => a.localeCompare(b));
+    }
+
+    function wizardNext() {
+      if (wizardStep === 0 && !document.getElementById("newProjectName").value.trim()) {
+        document.getElementById("newProjectName").focus();
+        return;
+      }
+      if (wizardStep === 3) {
+        createProjectFromWizard();
+        return;
+      }
+      wizardStep += 1;
+      renderWizardStep();
+    }
+
+    function createProjectFromWizard() {
+      const name = document.getElementById("newProjectName").value.trim();
+      const delivery = document.getElementById("newProjectDelivery").value;
+      if (!name || !delivery) {
+        wizardStep = name ? 1 : 0;
+        renderWizardStep();
+        document.getElementById(name ? "newProjectDelivery" : "newProjectName").focus();
+        return;
+      }
+
+      const stages = [...document.querySelectorAll("#wizardStageList .stage-check")]
+        .filter(row => row.querySelector('input[type="checkbox"]').checked)
+        .map(row => ({
+          name: row.querySelector("strong").textContent.trim() || "Stage",
+          date: row.querySelector('input[type="date"]').value
+        }));
+      const pipeline = Object.fromEntries((stages.length ? stages : defaultProjectStages.slice(0, 4).map(name => ({ name }))).map(stage => [stage.name, 0]));
+      const timeline = stages.map(stage => [stage.date || "TBD", stage.name, 0]);
+      const crew = [...document.querySelectorAll("#wizardCrewList .crew-row")].map(row => ({
+        member: row.querySelector("select").value,
+        role: row.querySelector("input").value.trim() || "Artist"
+      }));
+
+      const project = {
+        id: uniqueProjectId(name),
+        name,
+        code: projectInitials(name),
+        type: document.getElementById("newProjectType").value,
+        startDate: document.getElementById("newProjectStart").value,
+        deadline: delivery,
+        phase: stages[0]?.name || "Planning",
+        status: "on",
+        thumbnail: document.getElementById("newProjectCoverPreview").dataset.cover || "",
+        estimatedBudget: Number(document.getElementById("newProjectBudget").value || 0),
+        fundingType: document.getElementById("newProjectFunding").value,
+        crew,
+        mainDirector: crew.find(person => /director/i.test(person.role))?.member || "To assign",
+        pipeline,
+        timeline: timeline.length ? timeline : [["TBD", "Planning", 0]]
+      };
+
+      data.projects.push(project);
+      saveData(false);
+      closeProjectWizard();
+      fillProjectSelects();
+      document.getElementById("detailProject").value = project.id;
+      document.getElementById("shotProject").value = project.id;
+      renderDashboard();
+      renderProjectDetail();
+      renderShots();
+      renderTimeline();
+      toast("Project created.");
+    }
+
+    function uniqueProjectId(name) {
+      const base = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "project";
+      let id = base;
+      let index = 2;
+      while (data.projects.some(project => project.id === id)) {
+        id = `${base}-${index}`;
+        index += 1;
+      }
+      return id;
+    }
+
+    function projectInitials(name) {
+      const typed = document.getElementById("newProjectInitials").value.trim();
+      const source = typed || name.split(/\s+/).map(word => word[0]).join("");
+      return source.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4) || "PROJ";
+    }
+
+    function setProjectCoverPreview(src) {
+      const preview = document.getElementById("newProjectCoverPreview");
+      preview.dataset.cover = src;
+      preview.innerHTML = src
+        ? `<img src="${escapeAttr(src)}" alt="Project cover preview">`
+        : "Click to upload or drag image over";
+    }
+
+    function handleProjectCoverFile(file) {
+      if (!file || !file.type.startsWith("image/")) return;
+      readImageFile(file, setProjectCoverPreview);
+    }
+
+    function bindEvents() {
+      document.querySelectorAll("[data-icon]").forEach(el => { el.innerHTML = icon(el.dataset.icon); });
+      document.querySelectorAll(".nav-btn").forEach(button => button.addEventListener("click", () => switchSection(button.dataset.section)));
+      document.querySelectorAll("[data-jump]").forEach(button => button.addEventListener("click", () => switchSection(button.dataset.jump)));
+      document.getElementById("collapseBtn").addEventListener("click", () => {
+        const app = document.getElementById("app");
+        app.classList.toggle("collapsed");
+        const collapsed = app.classList.contains("collapsed");
+        document.getElementById("collapseIcon").textContent = collapsed ? "›" : "‹";
+        localStorage.setItem("sagui-sidebar-collapsed", collapsed ? "1" : "0");
+      });
+      document.getElementById("saveBtn").addEventListener("click", () => saveData(true));
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        data = structuredClone(seedData);
+        saveData(false);
+        init();
+        toast("Demo data restored.");
+      });
+      document.getElementById("newProjectBtn").addEventListener("click", openProjectWizard);
+      document.getElementById("closeProjectWizard").addEventListener("click", closeProjectWizard);
+      document.getElementById("projectWizardModal").addEventListener("click", event => {
+        if (event.target.id === "projectWizardModal") closeProjectWizard();
+      });
+      document.getElementById("projectWizard").addEventListener("submit", event => event.preventDefault());
+      document.getElementById("wizardBack").addEventListener("click", () => {
+        wizardStep = Math.max(0, wizardStep - 1);
+        renderWizardStep();
+      });
+      document.getElementById("wizardNext").addEventListener("click", wizardNext);
+      document.getElementById("wizardSkip").addEventListener("click", () => {
+        wizardStep = Math.min(3, wizardStep + 1);
+        renderWizardStep();
+      });
+      document.getElementById("addWizardStage").addEventListener("click", () => {
+        document.getElementById("wizardStageList").insertAdjacentHTML("beforeend", stageRowEditor("New stage", true));
+      });
+      document.getElementById("addWizardCrew").addEventListener("click", () => {
+        document.getElementById("wizardCrewList").insertAdjacentHTML("beforeend", crewRowEditor());
+      });
+      document.getElementById("wizardCrewList").addEventListener("click", event => {
+        const remove = event.target.closest("[data-remove-crew]");
+        if (remove && document.querySelectorAll("#wizardCrewList .crew-row").length > 1) remove.closest(".crew-row").remove();
+      });
+      document.getElementById("newProjectInitials").addEventListener("input", event => {
+        event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+      });
+      const coverPreview = document.getElementById("newProjectCoverPreview");
+      const coverFile = document.getElementById("newProjectCoverFile");
+      coverPreview.addEventListener("click", () => coverFile.click());
+      coverPreview.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          coverFile.click();
+        }
+      });
+      coverPreview.addEventListener("dragover", event => {
+        event.preventDefault();
+        coverPreview.classList.add("drag-over");
+      });
+      coverPreview.addEventListener("dragleave", event => {
+        if (!coverPreview.contains(event.relatedTarget)) coverPreview.classList.remove("drag-over");
+      });
+      coverPreview.addEventListener("drop", event => {
+        event.preventDefault();
+        coverPreview.classList.remove("drag-over");
+        handleProjectCoverFile(event.dataTransfer.files[0]);
+      });
+      coverFile.addEventListener("change", event => handleProjectCoverFile(event.target.files[0]));
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && document.getElementById("projectWizardModal").classList.contains("open")) closeProjectWizard();
+      });
+      document.addEventListener("paste", pasteImageIntoSelectedThumbnail);
+      document.getElementById("projectFilter").addEventListener("change", renderDashboard);
+      document.getElementById("detailProject").addEventListener("change", renderProjectDetail);
+      ["shotProject", "shotStatus", "shotArtist"].forEach(id => document.getElementById(id).addEventListener("change", renderShots));
+      document.getElementById("shotSearch").addEventListener("input", renderShots);
+      document.getElementById("timelineProject").addEventListener("change", renderTimeline);
+      document.getElementById("expandAllShotsBtn").addEventListener("click", () => {
+        document.querySelectorAll(".scene-sheet").forEach(scene => {
+          scene.open = true;
+          localStorage.setItem(`sagui-scene-open-${scene.dataset.scene}`, "1");
+        });
+      });
+      document.getElementById("collapseAllShotsBtn").addEventListener("click", () => {
+        document.querySelectorAll(".scene-sheet").forEach(scene => {
+          scene.open = false;
+          localStorage.setItem(`sagui-scene-open-${scene.dataset.scene}`, "0");
+        });
+      });
+      document.getElementById("addShotBtn").addEventListener("click", () => {
+        const project = document.getElementById("shotProject").value;
+        addShotToScene(project, "New scene");
+      });
+    }
+
+    function init() {
+      fillProjectSelects();
+      if (localStorage.getItem("sagui-sidebar-collapsed") === "1") {
+        document.getElementById("app").classList.add("collapsed");
+        document.getElementById("collapseIcon").textContent = "›";
+      }
+      renderDashboard();
+      renderProjectDetail();
+      renderShots();
+      renderTimeline();
+    }
+
+    bindEvents();
+    init();
+  </script>
+</body>
+</html>
