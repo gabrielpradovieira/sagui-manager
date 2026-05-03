@@ -1523,6 +1523,134 @@
       .status-tag { padding-inline: 6px; }
     }
 
+    /* === Shots page cover === */
+    .shots-cover {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 18px 8px 18px 8px;
+      background: var(--blue-2);
+      margin-bottom: 20px;
+    }
+
+    .shots-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* === Shots topbar project selector === */
+    .shots-project-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    select.shots-topbar-select {
+      width: auto;
+      min-height: 0;
+      padding: 0 4px;
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid var(--blue);
+      border-radius: 0;
+      color: var(--blue);
+      font-size: clamp(22px, 2.6vw, 30px);
+      font-weight: 900;
+      line-height: 1.05;
+      outline: none;
+    }
+
+    select.shots-topbar-select:focus {
+      border-color: var(--pink);
+      box-shadow: none;
+    }
+
+    .shots-topbar-sep {
+      color: var(--muted);
+      font-size: clamp(18px, 2vw, 26px);
+      font-weight: 600;
+    }
+
+    /* === Scene lead button === */
+    .add-lead-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 22px;
+      padding: 2px 9px;
+      color: var(--blue);
+      background: rgba(22, 38, 90, .07);
+      border: 1px solid rgba(22, 38, 90, .2);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .15s ease, border-color .15s ease;
+      white-space: nowrap;
+    }
+
+    .add-lead-btn:hover {
+      background: #fff1f7;
+      border-color: rgba(236, 57, 131, .45);
+    }
+
+    .lead-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 22px;
+      padding: 2px 9px;
+      color: var(--blue);
+      background: #dfe8ff;
+      border: 1px solid rgba(22, 38, 90, .22);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .15s ease, border-color .15s ease;
+      white-space: nowrap;
+    }
+
+    .lead-badge:hover {
+      background: #fff1f7;
+      border-color: rgba(236, 57, 131, .45);
+    }
+
+    .lead-dropdown {
+      position: fixed;
+      z-index: 80;
+      min-width: 180px;
+      padding: 6px;
+      background: #fff;
+      border: 1px solid rgba(22, 38, 90, .22);
+      border-radius: 12px 4px 12px 4px;
+      box-shadow: 0 14px 32px rgba(22, 38, 90, .16);
+    }
+
+    .lead-option {
+      width: 100%;
+      min-height: 34px;
+      padding: 6px 10px;
+      color: var(--blue);
+      background: transparent;
+      border: 0;
+      border-radius: 8px 3px 8px 3px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: background .12s ease;
+    }
+
+    .lead-option:hover {
+      background: #fff1f7;
+    }
+
     @media (max-width: 820px) {
       .app,
       .app.collapsed { grid-template-columns: 1fr; }
@@ -1654,9 +1782,18 @@
     <main>
       <header class="topbar">
         <div>
-          <p class="kicker">Sagui Studio · Production command center</p>
-          <h1>Track films, reels, scenes, and shots without drowning in spreadsheets.</h1>
-          <p>A lean prototype focused only on production management: project overview, pipeline progress, shot tracking, weekly timeline, and status risks.</p>
+          <div id="topbarDefault">
+            <p class="kicker">Sagui Studio · Production command center</p>
+            <h1>Track films, reels, scenes, and shots without drowning in spreadsheets.</h1>
+            <p>A lean prototype focused only on production management: project overview, pipeline progress, shot tracking, weekly timeline, and status risks.</p>
+          </div>
+          <div id="topbarShots" style="display:none">
+            <p class="kicker">Sagui Studio · Shots</p>
+            <div class="shots-project-header">
+              <select id="shotProject" class="shots-topbar-select" aria-label="Select project"></select>
+              <span class="shots-topbar-sep">· Shots</span>
+            </div>
+          </div>
         </div>
         <div class="top-actions">
           <button class="btn" id="resetBtn" type="button">Reset demo</button>
@@ -1713,11 +1850,11 @@
       </section>
 
       <section id="shots" class="section">
+        <div class="shots-cover" id="shotsCover" style="display:none"></div>
         <div class="metric-grid" id="shotMetrics"></div>
         <div id="shotProgressSummary"></div>
         <div class="toolbar">
           <div class="filters">
-            <select id="shotProject"></select>
             <select id="shotStatus">
               <option value="all">All statuses</option>
               <option value="Approved">Approved</option>
@@ -1726,6 +1863,7 @@
               <option value="Render pending">Render pending</option>
             </select>
             <select id="shotArtist"></select>
+            <select id="shotLead"><option value="all">All leads</option></select>
             <input id="shotSearch" placeholder="Search scene, shot, artist, file">
           </div>
           <div class="filters">
@@ -1965,7 +2103,9 @@
 
     function loadData() {
       const stored = localStorage.getItem(storeKey);
-      return stored ? JSON.parse(stored) : structuredClone(seedData);
+      const loaded = stored ? JSON.parse(stored) : structuredClone(seedData);
+      if (!loaded.sceneLeads) loaded.sceneLeads = {};
+      return loaded;
     }
 
     function saveData(showToast = true) {
@@ -2151,16 +2291,26 @@
       const project = document.getElementById("shotProject").value || data.projects[0].id;
       const status = document.getElementById("shotStatus").value;
       const previousArtist = document.getElementById("shotArtist").value || "all";
+      const previousLead = document.getElementById("shotLead").value || "all";
       const search = document.getElementById("shotSearch").value.toLowerCase();
+
+      updateShotsCover(project);
+
       const artists = [...new Set(data.shots.map(shot => shot.artist))].sort();
       document.getElementById("shotArtist").innerHTML = `<option value="all">All artists</option>${artists.map(artist => `<option>${artist}</option>`).join("")}`;
       document.getElementById("shotArtist").value = previousArtist;
+
+      const leads = [...new Set(Object.values(data.sceneLeads || {}).filter(Boolean))].sort();
+      document.getElementById("shotLead").innerHTML = `<option value="all">All leads</option>${leads.map(lead => `<option>${escapeHtml(lead)}</option>`).join("")}`;
+      document.getElementById("shotLead").value = previousLead;
 
       const rows = data.shots.filter(shot => {
         const text = `${shot.scene} ${shot.code} ${shot.artist} ${shot.file}`.toLowerCase();
         const statusMatch = status === "all" || shot.animStatus === status || shot.renderStatus === status;
         const artistMatch = previousArtist === "all" || shot.artist === previousArtist;
-        return shot.project === project && statusMatch && artistMatch && text.includes(search);
+        const sceneLead = getSceneLead(project, shot.scene);
+        const leadMatch = previousLead === "all" || sceneLead === previousLead;
+        return shot.project === project && statusMatch && artistMatch && leadMatch && text.includes(search);
       });
 
       const seconds = rows.reduce((sum, shot) => sum + Number(shot.seconds || 0), 0);
@@ -2178,7 +2328,7 @@
       const groups = groupByScene(rows);
       document.getElementById("shotSheet").innerHTML = groups.map((group, index) => {
         const addScene = index < groups.length - 1 ? sceneAddButton(group.scene) : "";
-        return `${sceneGroup(group)}${addScene}`;
+        return `${sceneGroup(group, project)}${addScene}`;
       }).join("");
       bindShotInputs();
       bindShotLinks();
@@ -2187,6 +2337,7 @@
       bindThumbnailTargets();
       bindSceneContextMenus();
       bindSceneToggles();
+      bindLeadButtons();
     }
 
     function shotProgressSummary(rows) {
@@ -2234,19 +2385,21 @@
       `;
     }
 
-    function sceneGroup(group) {
+    function sceneGroup(group, project) {
       const total = group.shots.length;
       const approved = group.shots.filter(shot => shot.animStatus === "Approved").length;
       const progress = total ? Math.round((approved / total) * 100) : 0;
       const storageKey = `sagui-scene-open-${group.scene}`;
       const isOpen = localStorage.getItem(storageKey) !== "0";
+      const lead = getSceneLead(project, group.scene);
       return `
-        <details class="scene-sheet" data-scene="${escapeAttr(group.scene)}" ${isOpen ? "open" : ""}>
+        <details class="scene-sheet" data-scene="${escapeAttr(group.scene)}" data-project="${escapeAttr(project)}" ${isOpen ? "open" : ""}>
           <summary>
             <span class="scene-arrow">${chevronIcon()}</span>
             <span class="scene-title">
-              <span>${group.scene}</span>
+              <span>${escapeHtml(group.scene)}</span>
               <small>· Takes ${takeRange(group.shots)} · ${total} takes</small>
+              ${lead ? leadBadgeHtml(lead) : addLeadBtnHtml()}
             </span>
             <span class="scene-stat">Completed</span>
             <span class="stage" style="grid-template-columns:1fr 42px"><span class="progress"><span class="bar" style="--value:${progress}%"></span></span><strong>${progress}%</strong></span>
@@ -2699,6 +2852,56 @@
       });
     }
 
+    function bindLeadButtons() {
+      document.querySelectorAll("#shotSheet .add-lead-btn, #shotSheet .lead-badge").forEach(btn => {
+        btn.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const details = btn.closest(".scene-sheet");
+          const scene = details?.dataset.scene;
+          const project = details?.dataset.project;
+          if (!scene || !project) return;
+          openLeadDropdown(btn, project, scene);
+        });
+      });
+    }
+
+    function openLeadDropdown(anchor, project, scene) {
+      document.querySelector(".lead-dropdown")?.remove();
+      const dropdown = document.createElement("div");
+      dropdown.className = "lead-dropdown";
+      const artists = artistOptions("").filter(a => a !== "To assign");
+      const currentLead = getSceneLead(project, scene);
+      dropdown.innerHTML = `
+        ${artists.map(a => `<button class="lead-option" type="button">${escapeHtml(a)}</button>`).join("")}
+        ${currentLead ? `<button class="lead-option" type="button" data-clear-lead style="color:var(--bad)">Remove lead</button>` : ""}
+      `;
+      document.body.appendChild(dropdown);
+      const rect = anchor.getBoundingClientRect();
+      dropdown.style.left = `${Math.min(rect.left, window.innerWidth - dropdown.offsetWidth - 16)}px`;
+      dropdown.style.top = `${Math.min(rect.bottom + 6, window.innerHeight - dropdown.offsetHeight - 16)}px`;
+      dropdown.querySelectorAll(".lead-option").forEach(opt => {
+        opt.addEventListener("click", () => {
+          if (opt.dataset.clearLead !== undefined) {
+            setSceneLead(project, scene, "");
+          } else {
+            setSceneLead(project, scene, opt.textContent.trim());
+          }
+          saveData(false);
+          dropdown.remove();
+          renderShots();
+        });
+      });
+      setTimeout(() => {
+        document.addEventListener("pointerdown", function closeLeadDropdown(e) {
+          if (!dropdown.contains(e.target)) {
+            dropdown.remove();
+            document.removeEventListener("pointerdown", closeLeadDropdown);
+          }
+        });
+      });
+    }
+
     function createShot(project, scene, number, code = "") {
       return {
         id: `s${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -2812,9 +3015,46 @@
       return escapeHtml(value).replace(/\n/g, " ");
     }
 
+    function getSceneLead(project, scene) {
+      return data.sceneLeads?.[`${project}:${scene}`] || "";
+    }
+
+    function setSceneLead(project, scene, lead) {
+      if (!data.sceneLeads) data.sceneLeads = {};
+      if (lead) {
+        data.sceneLeads[`${project}:${scene}`] = lead;
+      } else {
+        delete data.sceneLeads[`${project}:${scene}`];
+      }
+    }
+
+    function updateShotsCover(projectId) {
+      const project = data.projects.find(p => p.id === projectId);
+      const cover = document.getElementById("shotsCover");
+      if (!cover) return;
+      if (project?.thumbnail) {
+        cover.innerHTML = `<img src="${escapeAttr(project.thumbnail)}" alt="${escapeAttr(project.name)} cover">`;
+        cover.style.display = "";
+      } else {
+        cover.innerHTML = "";
+        cover.style.display = "none";
+      }
+    }
+
+    function addLeadBtnHtml() {
+      return `<button class="add-lead-btn" type="button">Add Lead</button>`;
+    }
+
+    function leadBadgeHtml(lead) {
+      return `<button class="lead-badge" type="button" title="Change lead">Lead: ${escapeHtml(lead)}</button>`;
+    }
+
     function switchSection(id) {
       document.querySelectorAll(".section").forEach(section => section.classList.toggle("active", section.id === id));
       document.querySelectorAll(".nav-btn").forEach(button => button.classList.toggle("active", button.dataset.section === id));
+      const isShots = id === "shots";
+      document.getElementById("topbarDefault").style.display = isShots ? "none" : "";
+      document.getElementById("topbarShots").style.display = isShots ? "" : "none";
       if (id === "dashboard") renderDashboard();
       if (id === "projects") renderProjectDetail();
       if (id === "shots") renderShots();
@@ -3062,7 +3302,7 @@
       document.addEventListener("paste", pasteImageIntoSelectedThumbnail);
       document.getElementById("projectFilter").addEventListener("change", renderDashboard);
       document.getElementById("detailProject").addEventListener("change", renderProjectDetail);
-      ["shotProject", "shotStatus", "shotArtist"].forEach(id => document.getElementById(id).addEventListener("change", renderShots));
+      ["shotProject", "shotStatus", "shotArtist", "shotLead"].forEach(id => document.getElementById(id).addEventListener("change", renderShots));
       document.getElementById("shotSearch").addEventListener("input", renderShots);
       document.getElementById("timelineProject").addEventListener("change", renderTimeline);
       document.getElementById("expandAllShotsBtn").addEventListener("click", () => {
