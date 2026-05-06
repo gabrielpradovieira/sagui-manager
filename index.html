@@ -26,6 +26,13 @@
 
     * { box-sizing: border-box; }
 
+    html,
+    body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
     body {
       margin: 0;
       color: var(--ink);
@@ -38,9 +45,20 @@
     button { cursor: pointer; }
 
     .app {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
       min-height: 100vh;
       display: grid;
       grid-template-columns: var(--sidebar) minmax(0, 1fr);
+      background: linear-gradient(
+        to right,
+        var(--blue) 0,
+        var(--blue) calc(var(--sidebar) - 6px),
+        var(--pink) calc(var(--sidebar) - 6px),
+        var(--pink) var(--sidebar),
+        var(--paper) var(--sidebar)
+      );
       transition: grid-template-columns .2s ease;
     }
 
@@ -139,7 +157,7 @@
       border: 1px solid transparent;
       border-radius: 16px 7px 16px 7px;
       text-align: left;
-      font-weight: 500;
+      font-weight: 400;
     }
 
     .app.collapsed .nav-btn {
@@ -174,6 +192,7 @@
 
     .user {
       margin-top: auto;
+      flex-shrink: 0;
       min-height: 64px;
       display: grid;
       grid-template-columns: 42px 1fr;
@@ -213,6 +232,8 @@
 
     main {
       min-width: 0;
+      max-width: 100%;
+      overflow-x: hidden;
       padding: 24px clamp(18px, 3vw, 40px) 40px;
     }
 
@@ -285,7 +306,11 @@
       height: 18px;
     }
 
-    .section { display: none; }
+    .section {
+      min-width: 0;
+      max-width: 100%;
+      display: none;
+    }
     .section.active { display: block; }
 
     .toolbar {
@@ -341,6 +366,10 @@
       margin-bottom: 18px;
     }
 
+    #scheduleWorkspace .metric-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
     .metric,
     .project-card,
     .panel,
@@ -353,6 +382,7 @@
     }
 
     .metric {
+      min-width: 0;
       min-height: 132px;
       display: grid;
       grid-template-columns: 48px 1fr;
@@ -756,7 +786,7 @@
     .scene-sheet summary {
       min-height: 62px;
       display: grid;
-      grid-template-columns: 28px minmax(220px, 1fr) 92px minmax(170px, 260px);
+      grid-template-columns: 28px 34px minmax(220px, 1fr) 92px minmax(170px, 260px);
       align-items: center;
       gap: 12px;
       padding: 14px 22px;
@@ -768,6 +798,37 @@
     }
 
     .scene-sheet summary::-webkit-details-marker { display: none; }
+
+    .scene-move-handle {
+      opacity: 1 !important;
+      justify-self: center;
+      color: var(--blue) !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .scene-move-handle:focus-visible {
+      opacity: 1 !important;
+    }
+
+    .scene-sheet summary .progress .bar {
+      background: linear-gradient(90deg, var(--pink), #ff7db4);
+      box-shadow: 0 0 0 1px rgba(236, 57, 131, .1);
+    }
+
+    .scene-sheet.scene-dragging {
+      opacity: .58;
+      background: #e8f2ff;
+    }
+
+    .scene-sheet.scene-drop-before {
+      box-shadow: 0 -4px 0 var(--pink), var(--shadow);
+    }
+
+    .scene-sheet.scene-drop-after {
+      box-shadow: 0 4px 0 var(--pink), var(--shadow);
+    }
 
     .scene-arrow {
       display: grid;
@@ -878,9 +939,31 @@
       transform: scale(1);
     }
 
+    .take-row::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: -4px;
+      height: 4px;
+      z-index: 1;
+      background: var(--pink);
+      border-radius: 999px;
+      opacity: 0;
+      transform: scaleX(.96);
+      transition: opacity .16s ease, transform .16s ease;
+      pointer-events: none;
+    }
+
     .take-row:has(.add-take-hover:hover),
     .take-row:has(.add-take-hover:focus-visible) {
-      box-shadow: 0 5px 0 var(--pink), 0 8px 18px rgba(236, 57, 131, .14);
+      box-shadow: 0 8px 18px rgba(236, 57, 131, .14);
+    }
+
+    .take-row:has(.add-take-hover:hover)::after,
+    .take-row:has(.add-take-hover:focus-visible)::after {
+      opacity: 1;
+      transform: scaleX(1);
     }
 
     .shot-table {
@@ -891,7 +974,7 @@
 
     .take-header {
       display: grid;
-      grid-template-columns: 32px 34px .7fr 1.1fr 1.25fr .42fr .98fr .98fr .98fr .98fr .42fr 1.15fr;
+      grid-template-columns: 32px 34px .7fr 1.08fr .42fr 1.18fr .42fr .9fr .9fr .9fr .9fr .42fr 1.1fr;
       align-items: center;
       gap: 0;
       padding: 0 14px;
@@ -928,7 +1011,7 @@
       position: relative;
       min-height: 48px;
       display: grid;
-      grid-template-columns: 32px 34px .7fr 1.1fr 1.25fr .42fr .98fr .98fr .98fr .98fr .42fr 1.15fr;
+      grid-template-columns: 32px 34px .7fr 1.08fr .42fr 1.18fr .42fr .9fr .9fr .9fr .9fr .42fr 1.1fr;
       align-items: center;
       gap: 0;
       padding: 5px 14px;
@@ -1098,6 +1181,14 @@
       padding-left: 12px;
     }
 
+    .take-row input.take-seconds {
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+      text-align: center;
+      font-weight: 900;
+    }
+
     .take-row input[data-field="comments"] {
       border-radius: 3px 8px 8px 3px;
     }
@@ -1105,7 +1196,7 @@
     .take-meta {
       color: var(--muted);
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 400;
     }
 
     .shot-thumb {
@@ -1154,8 +1245,8 @@
       justify-self: start;
       color: var(--blue);
       background: transparent;
-      border: 0;
-      border-radius: 50%;
+      border: 1px solid transparent;
+      border-radius: 7px 3px 7px 3px;
       line-height: 0;
       padding: 0;
       cursor: pointer;
@@ -1164,6 +1255,42 @@
     .shot-action svg {
       width: 18px;
       height: 18px;
+    }
+
+    .thumbnail-viewer {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: grid;
+      place-items: center;
+      padding: clamp(18px, 5vw, 64px);
+      background: rgba(8, 15, 40, .78);
+      backdrop-filter: blur(12px);
+    }
+
+    .thumbnail-viewer img {
+      max-width: min(92vw, 1180px);
+      max-height: 86vh;
+      display: block;
+      object-fit: contain;
+      border-radius: 18px 6px 18px 6px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .42);
+    }
+
+    .thumbnail-viewer button {
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      width: 42px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: rgba(255, 255, 255, .12);
+      border: 1px solid rgba(255, 255, 255, .34);
+      border-radius: 12px 4px 12px 4px;
+      font-size: 24px;
+      font-weight: 800;
     }
 
     .link-popover {
@@ -1242,7 +1369,7 @@
     .shot-progress-summary {
       display: grid;
       gap: 8px;
-      margin: -8px 0 16px;
+      margin: 0 0 16px;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--line);
     }
@@ -1608,7 +1735,7 @@
       .detail-layout { grid-template-columns: 1fr; }
       .take-header,
       .take-row {
-        grid-template-columns: 32px 34px .65fr 1.1fr 1.05fr .34fr .82fr .82fr .82fr .82fr .34fr .9fr;
+        grid-template-columns: 32px 34px .65fr 1.05fr .38fr 1fr .34fr .78fr .78fr .78fr .78fr .34fr .9fr;
       }
       .take-row { padding-inline: 10px; }
       .take-row input,
@@ -1618,7 +1745,10 @@
 
     @media (max-width: 820px) {
       .app,
-      .app.collapsed { grid-template-columns: 1fr; }
+      .app.collapsed {
+        grid-template-columns: 1fr;
+        background: var(--paper);
+      }
       aside {
         position: static;
         height: auto;
@@ -1638,8 +1768,12 @@
       .project-grid,
       .board,
       .mini-grid { grid-template-columns: 1fr; }
+      .schedule-sheet {
+        --schedule-stage-col: 132px;
+        --schedule-month-col: 132px;
+      }
       .scene-sheet summary {
-        grid-template-columns: 22px 1fr;
+        grid-template-columns: 22px 34px 1fr;
       }
       .scene-sheet summary .scene-stat,
       .scene-sheet summary .stage { display: none; }
@@ -1669,6 +1803,33 @@
       .wizard-steps,
       .stage-check,
       .crew-row { grid-template-columns: 1fr; }
+      .team-layout,
+      .team-board-stack,
+      .finance-layout,
+      .finance-overview-grid,
+      .project-details-layout,
+      .finance-budget-split,
+      .finance-chart-grid,
+      .payment-tools,
+      .pie-card,
+      .pie-body,
+      .team-member-row,
+      .team-filters,
+      .animator-row,
+      .details-grid { grid-template-columns: 1fr; }
+      .details-field.full { grid-column: auto; }
+      .animator-row strong { text-align: left; }
+      .cover-meta {
+        grid-template-columns: 1fr;
+      }
+      .cover-meta-line,
+      .cover-meta-director {
+        display: grid;
+      }
+      .cover-meta-line .cover-meta-item:nth-child(2) {
+        padding-left: 0;
+        border-left: 0;
+      }
       .modal-backdrop { padding: 14px; }
       .wizard-head,
       .wizard-body,
@@ -1677,19 +1838,1495 @@
 
     /* === Shots page cover === */
     .shots-cover {
+      position: relative;
       width: 100%;
-      aspect-ratio: 16 / 9;
+      min-height: clamp(160px, 24vw, 280px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
+      gap: 18px;
+      padding: clamp(18px, 3vw, 30px);
       overflow: hidden;
       border-radius: 18px 8px 18px 8px;
-      background: var(--blue-2);
+      background-color: var(--blue-2);
+      background-image:
+        linear-gradient(90deg, rgba(22, 38, 90, .84), rgba(22, 38, 90, .34)),
+        var(--shots-cover-image, linear-gradient(135deg, var(--blue), var(--pink)));
+      background-position: center;
+      background-size: cover;
+      color: var(--cream);
       margin-bottom: 20px;
+      box-shadow: var(--shadow);
     }
 
-    .shots-cover img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .cover-upload-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 38px;
+      min-height: 38px;
+      display: inline-grid;
+      place-items: center;
+      color: var(--cream);
+      background: rgba(22, 38, 90, .34);
+      border: 1px solid rgba(255, 255, 255, .34);
+      border-radius: 10px 4px 10px 4px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, .16);
+      backdrop-filter: blur(8px);
+    }
+
+    .cover-upload-btn:hover,
+    .cover-upload-btn:focus-visible {
+      background: rgba(236, 57, 131, .82);
+      outline: 0;
+    }
+
+    .cover-upload-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .cover-upload-input {
+      display: none;
+    }
+
+    .shots-cover strong,
+    .shots-cover span,
+    .cover-meta-line {
       display: block;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, .22);
+    }
+
+    .shots-cover strong {
+      max-width: min(820px, 100%);
+      font-size: clamp(26px, 3.5vw, 46px);
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: 0;
+    }
+
+    .shots-cover span {
+      margin-top: 0;
+      color: rgba(255, 255, 255, .78);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .shots-cover .cover-meta-item {
+      display: inline-flex;
+    }
+
+    .cover-meta {
+      display: grid;
+      grid-template-columns: max-content max-content;
+      column-gap: 28px;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .cover-meta-line {
+      display: contents;
+    }
+
+    .cover-meta-line .cover-meta-item:nth-child(2) {
+      padding-left: 18px;
+      border-left: 1px solid rgba(255, 255, 255, .34);
+    }
+
+    .cover-meta-director {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cover-meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cover-meta-item svg {
+      width: 15px;
+      height: 15px;
+      flex: 0 0 15px;
+    }
+
+    .shot-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 0 0 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .shot-tab {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      color: var(--blue);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 14px 7px 14px 7px;
+      font-weight: 900;
+    }
+
+    .shot-tab:hover,
+    .shot-tab.active {
+      color: var(--cream);
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .shot-tab-panel {
+      min-width: 0;
+      max-width: 100%;
+      display: none;
+    }
+
+    .shot-tab-panel.active {
+      display: block;
+    }
+
+    .shot-tab-panel .toolbar {
+      border-top: 0;
+    }
+
+    .roll-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px;
+      padding: 0 0 10px;
+    }
+
+    .roll-tab {
+      min-height: 34px;
+      padding: 6px 12px;
+      color: var(--blue);
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .roll-tab:hover,
+    .roll-tab.active {
+      color: var(--pink);
+      text-decoration: underline;
+      text-underline-offset: 7px;
+      text-decoration-thickness: 2px;
+    }
+
+    .roll-actions {
+      position: relative;
+      margin-left: auto;
+    }
+
+    .roll-manager {
+      position: relative;
+    }
+
+    .roll-manager summary {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 12px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      list-style: none;
+      cursor: pointer;
+    }
+
+    .roll-manager summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .roll-manager summary:hover,
+    .roll-manager[open] summary {
+      color: var(--blue);
+    }
+
+    .roll-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 20;
+      width: min(280px, calc(100vw - 48px));
+      padding: 10px;
+      color: var(--blue);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .roll-menu-title {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .roll-menu-list {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .roll-menu-row {
+      min-height: 36px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px;
+      background: var(--soft);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .roll-menu-row.active {
+      border-color: rgba(236, 59, 133, .34);
+      background: rgba(236, 59, 133, .09);
+    }
+
+    .roll-menu-delete,
+    .roll-menu-add {
+      min-height: 30px;
+      border-radius: 6px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .roll-menu-delete {
+      padding: 4px 8px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .roll-menu-delete:hover {
+      color: var(--pink);
+    }
+
+    .roll-menu-delete:disabled {
+      color: var(--muted);
+      cursor: not-allowed;
+      opacity: .42;
+    }
+
+    .roll-menu-add {
+      width: 100%;
+      padding: 6px 10px;
+      color: var(--blue);
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .roll-menu-add:hover {
+      border-color: var(--blue);
+    }
+
+    .shot-tab-icon {
+      width: 16px;
+      height: 16px;
+      display: inline-grid;
+      place-items: center;
+      line-height: 0;
+    }
+
+    .shot-tab-icon svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    .team-workspace {
+      min-width: 0;
+      max-width: 100%;
+      display: grid;
+      gap: 18px;
+    }
+
+    .project-details-layout {
+      display: grid;
+      grid-template-columns: minmax(300px, .82fr) minmax(420px, 1.18fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .team-layout {
+      display: grid;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .team-board-stack {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .member-insights {
+      display: grid;
+      gap: 14px;
+    }
+
+    .member-insight-block {
+      display: grid;
+      gap: 8px;
+      padding: 10px 0;
+      border-top: 1px solid rgba(22, 38, 90, .12);
+    }
+
+    .member-insight-block:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .member-insight-block span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .member-insight-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    .team-panel {
+      padding: 18px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 18px 6px 18px 6px;
+      box-shadow: var(--shadow);
+    }
+
+    .team-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .team-panel-head h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .team-member-list,
+    .animator-board {
+      display: grid;
+      gap: 8px;
+    }
+
+    .team-filters {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(160px, 220px);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .team-sheet {
+      overflow-x: auto;
+      border: 1px solid rgba(22, 38, 90, .18);
+      border-radius: 12px 4px 12px 4px;
+    }
+
+    .team-member-header,
+    .team-member-row {
+      display: grid;
+      grid-template-columns: 36px minmax(150px, 1fr) minmax(140px, .8fr) minmax(190px, 1fr) minmax(140px, .65fr) minmax(130px, .65fr) 128px 116px 128px 128px 145px;
+      min-width: 1540px;
+      gap: 0;
+      align-items: center;
+    }
+
+    .team-member-header {
+      min-height: 42px;
+      padding: 0 10px;
+      color: #fff;
+      background: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .team-member-header span,
+    .team-member-row > * {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .team-member-header span + span,
+    .team-member-row > * + * {
+      border-left: 1px solid rgba(22, 38, 90, .16);
+    }
+
+    .team-member-header span + span {
+      border-left-color: rgba(255, 255, 255, .22);
+    }
+
+    .team-member-list {
+      gap: 0;
+    }
+
+    .team-member-row input,
+    .team-member-row select {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      color: var(--blue);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px 3px 10px 3px;
+      font-weight: 400;
+    }
+
+    .team-member-row {
+      padding: 5px 10px;
+      background: #f8f9fb;
+      border-top: 1px solid rgba(22, 38, 90, .18);
+      font-weight: 400;
+    }
+
+    .team-member-row span,
+    .team-member-row strong {
+      font-weight: 400;
+    }
+
+    .team-member-row:hover input,
+    .team-member-row:hover select,
+    .team-member-row input:focus,
+    .team-member-row select:focus {
+      background: #fff;
+      border-color: rgba(22, 38, 90, .24);
+    }
+
+    .team-member-row.selected {
+      background: #d7ebff;
+      box-shadow: inset 0 0 0 2px #0b88ff;
+    }
+
+    .team-member-select {
+      display: grid;
+      place-items: center;
+      padding: 0 !important;
+      border-left: 0 !important;
+    }
+
+    .team-member-select input {
+      width: 16px;
+      height: 16px;
+      min-height: 16px;
+      padding: 0;
+      accent-color: var(--pink);
+    }
+
+    .team-date-field:not(:focus) {
+      color: var(--blue);
+    }
+
+    .board-toggle {
+      display: inline-flex;
+      gap: 4px;
+      padding: 3px;
+      background: #eef2f7;
+      border: 1px solid rgba(22, 38, 90, .14);
+      border-radius: 10px 3px 10px 3px;
+    }
+
+    .board-toggle button {
+      min-height: 28px;
+      padding: 5px 9px;
+      color: var(--blue);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px 3px 8px 3px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .board-toggle button.active {
+      color: #fff;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .animator-row {
+      display: grid;
+      grid-template-columns: minmax(130px, 1fr) minmax(120px, 180px) 64px;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 8px 10px;
+      background: #f8f9fb;
+      border: 1px solid rgba(22, 38, 90, .14);
+      border-radius: 10px 3px 10px 3px;
+      font-weight: 700;
+    }
+
+    .animator-row span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 400;
+    }
+
+    .animator-row .progress {
+      min-width: 0;
+    }
+
+    .animator-row strong {
+      text-align: right;
+    }
+
+    .team-empty {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .details-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .details-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .details-field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .details-field textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .details-read {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .details-read-item {
+      min-height: 0;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+    }
+
+    .details-read-item.full {
+      grid-column: 1 / -1;
+    }
+
+    .details-read-item span,
+    .document-sheet span,
+    .schedule-sheet span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .details-read-item strong,
+    .details-read-item p {
+      margin: 7px 0 0;
+      color: var(--blue);
+      font-weight: 400;
+    }
+
+    .details-read-item p {
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+    .document-sheet,
+    .schedule-sheet {
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 12px 4px 12px 4px;
+    }
+
+    .document-row,
+    .document-header {
+      min-width: 760px;
+      display: grid;
+      grid-template-columns: minmax(180px, 1.1fr) minmax(120px, .55fr) minmax(260px, 1.4fr) 54px;
+      align-items: center;
+      gap: 0;
+    }
+
+    .document-sheet.editing .document-row,
+    .document-sheet.editing .document-header {
+      grid-template-columns: minmax(150px, 1fr) minmax(120px, .7fr) minmax(220px, 1.3fr) minmax(190px, 1.1fr) 46px;
+    }
+
+    .document-header,
+    .schedule-header {
+      min-height: 42px;
+      padding: 0 12px;
+      color: #fff;
+      background: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .document-header span,
+    .schedule-header span {
+      color: #fff;
+    }
+
+    .document-row {
+      min-height: 48px;
+      padding: 6px 12px;
+      border-top: 1px solid rgba(22, 38, 90, .14);
+      font-weight: 800;
+    }
+
+    .document-row input {
+      min-height: 34px;
+      padding: 6px 8px;
+      border-radius: 10px 3px 10px 3px;
+      font-weight: 700;
+    }
+
+    .document-row small,
+    .schedule-row small {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .schedule-workspace {
+      min-width: 0;
+      max-width: 100%;
+      display: grid;
+      gap: 18px;
+    }
+
+    .schedule-sheet {
+      --schedule-stage-col: 160px;
+      --schedule-month-col: clamp(132px, calc((100cqw - var(--schedule-stage-col)) / 6), 220px);
+      width: 100%;
+      box-shadow: var(--shadow);
+    }
+
+    .schedule-header,
+    .schedule-row {
+      width: max-content;
+      min-width: calc(var(--schedule-stage-col) + (12 * var(--schedule-month-col)));
+      display: grid;
+      grid-template-columns: var(--schedule-stage-col) repeat(12, var(--schedule-month-col));
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .schedule-row {
+      min-height: 84px;
+      border-top: 1px solid rgba(22, 38, 90, .14);
+    }
+
+    .schedule-stage {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      color: var(--blue);
+      background: #f8f9fb;
+      border-right: 1px solid rgba(22, 38, 90, .16);
+      font-weight: 900;
+    }
+
+    .schedule-stage.active {
+      background: #fff1f7;
+      box-shadow: inset 4px 0 0 var(--pink);
+    }
+
+    .schedule-stage.production {
+      background: #eef6ff;
+      box-shadow: inset 4px 0 0 #7ab8f2;
+    }
+
+    .schedule-stage.post,
+    .schedule-stage.accountability {
+      background: #fff7df;
+      box-shadow: inset 4px 0 0 #ffd66b;
+    }
+
+    .schedule-cell {
+      position: relative;
+      min-height: 84px;
+      padding: 9px;
+      background: #fff;
+      border-right: 1px solid rgba(22, 38, 90, .09);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .schedule-cell.active {
+      background: #fff1f7;
+      box-shadow: inset 0 4px 0 var(--pink);
+    }
+
+    .schedule-cell.production {
+      background: #eef6ff;
+      box-shadow: inset 0 4px 0 #7ab8f2;
+    }
+
+    .schedule-cell.post {
+      background: #fff7df;
+      box-shadow: inset 0 4px 0 #ffd66b;
+    }
+
+    .schedule-cell.accountability {
+      background: #edf7ef;
+      box-shadow: inset 0 4px 0 #77c987;
+    }
+
+    .schedule-cell.empty {
+      background: #f7f8fb;
+      color: rgba(22, 38, 90, .36);
+      box-shadow: none;
+    }
+
+    .schedule-cell strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .schedule-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .schedule-title svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .schedule-source {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .schedule-source code {
+      color: var(--blue);
+      background: #eef2f7;
+      padding: 2px 5px;
+      border-radius: 5px;
+    }
+
+    .schedule-panel {
+      container-type: inline-size;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      padding: 18px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 18px 6px 18px 6px;
+      box-shadow: var(--shadow);
+    }
+
+    .finance-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .finance-chart-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .finance-overview-grid {
+      display: grid;
+      grid-template-columns: minmax(300px, .72fr) minmax(0, .82fr) minmax(300px, .62fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .finance-input-board {
+      display: grid;
+      gap: 14px;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      align-content: stretch;
+      align-self: stretch;
+    }
+
+    .finance-board-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .finance-board-head .finance-card-title {
+      margin: 0;
+    }
+
+    .finance-read-list {
+      display: grid;
+      gap: 10px;
+      height: 100%;
+      max-height: none;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .finance-budget-split {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .finance-read-row {
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(22, 38, 90, .12);
+    }
+
+    .finance-read-row:last-child {
+      border-bottom: 0;
+    }
+
+    .finance-read-row span,
+    .finance-read-budget span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .finance-read-row strong,
+    .finance-read-budget strong {
+      color: var(--blue);
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .finance-read-budget {
+      display: grid;
+      gap: 4px;
+      padding: 12px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 12px 4px 12px 4px;
+    }
+
+    .finance-read-budget small {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .finance-field-group {
+      display: grid;
+      gap: 7px;
+    }
+
+    .finance-input-board .finance-field-group:last-of-type {
+      min-height: 0;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .finance-field-group label,
+    .income-row span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .income-list {
+      display: grid;
+      gap: 8px;
+      height: 100%;
+      max-height: none;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .income-row {
+      display: grid;
+      grid-template-columns: minmax(110px, 1fr) minmax(110px, .7fr) 34px;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .income-row input {
+      min-width: 0;
+    }
+
+    .income-delete {
+      min-height: 38px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 8px 3px 8px 3px;
+      font-weight: 900;
+    }
+
+    .income-delete:hover {
+      color: var(--pink);
+      border-color: rgba(236, 57, 131, .34);
+    }
+
+    .finance-panel-tabs {
+      display: inline-flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .finance-panel-tab {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 0 6px;
+      color: var(--blue);
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      font: inherit;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .finance-panel-tab.active {
+      color: var(--blue);
+      border-bottom-color: var(--pink);
+      font-weight: 800;
+    }
+
+    .finance-panel-tab svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .cost-sheet {
+      position: relative;
+      max-height: 404px;
+      overflow: auto;
+    }
+
+    .payment-sheet {
+      max-height: 404px;
+    }
+
+    .payment-header.cost-header,
+    .payment-row.cost-row {
+      position: relative;
+      min-width: 1100px;
+      grid-template-columns: 34px minmax(180px, 1fr) minmax(150px, .72fr) repeat(3, minmax(120px, .58fr)) 76px;
+    }
+
+    .cost-add-hover {
+      position: absolute;
+      left: 2px;
+      bottom: -17px;
+      z-index: 2;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--pink);
+      border: 0;
+      border-radius: 999px;
+      box-shadow: 0 6px 14px rgba(22, 38, 90, .18);
+      opacity: 0;
+      transform: scale(.9);
+      transition: opacity .16s ease, transform .16s ease;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .cost-row:hover .cost-add-hover,
+    .cost-add-hover:hover,
+    .cost-add-hover:focus-visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .cost-add-strip {
+      min-width: 1100px;
+      position: relative;
+      height: 22px;
+      background: #fff;
+    }
+
+    .cost-add-strip .cost-add-hover {
+      left: 2px;
+      bottom: -12px;
+    }
+
+    .cost-add-strip:hover .cost-add-hover {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .cost-link {
+      justify-self: start;
+    }
+
+    .cost-sort-head {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: inherit;
+      background: transparent;
+      border: 0;
+      font: inherit;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .finance-chart-stack {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+      align-self: stretch;
+    }
+
+    .finance-chart-stack .pie-card {
+      position: relative;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .finance-chart-stack .pie-card::before {
+      content: "";
+      position: absolute;
+      left: -18px;
+      top: 2px;
+      bottom: 2px;
+      width: 4px;
+      border-radius: 999px;
+      background: #77c987;
+    }
+
+    .finance-chart-stack .pie-card.spending-card::before {
+      background: #ef4d5b;
+    }
+
+    .finance-chart-stack .pie-card + .pie-card {
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .monthly-spending-board {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 18px;
+      align-content: stretch;
+      align-self: stretch;
+    }
+
+    .monthly-bars {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      padding-top: 12px;
+    }
+
+    .monthly-year {
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(22, 38, 90, .12);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .monthly-year:first-child {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .monthly-bar {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr) 76px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .monthly-bar-track {
+      width: 100%;
+      height: 20px;
+      overflow: hidden;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+
+    .monthly-bar-fill {
+      width: var(--width);
+      height: 100%;
+      background: var(--pink);
+    }
+
+    .monthly-bar strong {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .monthly-bar span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .pie-card {
+      display: block;
+    }
+
+    .finance-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 14px;
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .finance-card-title svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .pie-body {
+      display: grid;
+      grid-template-columns: minmax(150px, 210px) 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .pie-chart {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: conic-gradient(var(--pink) 0 45%, #7ab8f2 45% 70%, #ffd66b 70% 88%, #77c987 88% 100%);
+      box-shadow: inset 0 0 0 18px #fff, 0 8px 18px rgba(22, 38, 90, .08);
+    }
+
+    .pie-chart.has-highlight {
+      transform: scale(1.04);
+      box-shadow: inset 0 0 0 14px #fff, 0 0 0 3px rgba(236, 57, 131, .18), 0 14px 28px rgba(22, 38, 90, .16);
+    }
+
+    .pie-percent {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      transform: translate(-50%, -50%);
+      min-width: 28px;
+      padding: 2px 5px;
+      color: #fff;
+      background: rgba(22, 38, 90, .72);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.2;
+      text-align: center;
+      pointer-events: none;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, .28);
+    }
+
+    .pie-legend {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-weight: 400;
+    }
+
+    .pie-legend li {
+      display: grid;
+      grid-template-columns: 12px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      min-height: 28px;
+      padding: 2px 4px;
+      border-radius: 8px 3px 8px 3px;
+      cursor: pointer;
+    }
+
+    .pie-legend li:hover,
+    .pie-legend li.active {
+      background: rgba(236, 57, 131, .08);
+    }
+
+    .pie-legend li.active span:nth-child(2),
+    .pie-legend li.active strong {
+      font-weight: 800;
+    }
+
+    .pie-dot {
+      width: 10px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--pink);
+    }
+
+    .pie-legend strong {
+      font-weight: 400;
+    }
+
+    .payment-sheet {
+      overflow-x: auto;
+      border: 1px solid rgba(22, 38, 90, .18);
+      border-radius: 12px 4px 12px 4px;
+    }
+
+    .payment-tools {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(160px, 220px) minmax(160px, 220px);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .cost-tools {
+      grid-template-columns: minmax(220px, 1fr) minmax(160px, 220px) minmax(160px, 220px);
+    }
+
+    .finance-period-total {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .finance-period-total span {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .payment-header,
+    .payment-row {
+      min-width: 1240px;
+      display: grid;
+      grid-template-columns: 34px minmax(160px, 1fr) minmax(130px, .72fr) minmax(140px, .72fr) minmax(110px, .58fr) repeat(3, minmax(118px, .6fr)) 76px 76px;
+      align-items: center;
+      gap: 0;
+    }
+
+    .payment-header {
+      min-height: 42px;
+      padding: 0 12px;
+      color: #fff;
+      background: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .payment-row {
+      min-height: 48px;
+      padding: 6px 12px;
+      border-top: 1px solid rgba(22, 38, 90, .14);
+      font-weight: 400;
+    }
+
+    .payment-row.selected {
+      background: #d7ebff;
+      box-shadow: inset 0 0 0 2px #0b88ff;
+    }
+
+    .payment-row strong,
+    .payment-row span {
+      font-weight: 400;
+    }
+
+    .payment-sort-head {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      justify-self: start;
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      border: 0;
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+    }
+
+    .payment-sort-head svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .payment-select {
+      display: inline-grid;
+      place-items: center;
+      padding: 0 !important;
+    }
+
+    .payment-select input {
+      width: 16px;
+      height: 16px;
+      min-height: 16px !important;
+      margin: 0;
+      padding: 0 !important;
+      accent-color: var(--pink);
+      cursor: pointer !important;
+    }
+
+    .payment-row select {
+      width: min(140px, 100%);
+      min-height: 34px;
+      padding: 6px 8px;
+      color: var(--ink);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px 3px 8px 3px;
+      font-weight: 400;
+    }
+
+    .payment-input {
+      width: min(118px, 100%);
+      min-height: 34px;
+      padding: 6px 8px;
+      color: var(--ink);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px 3px 8px 3px;
+      font-weight: 400;
+    }
+
+    .payment-quantity {
+      width: min(108px, 100%);
+    }
+
+    .payment-row:hover .payment-input,
+    .payment-row:hover select,
+    .payment-row select:focus,
+    .payment-input:focus {
+      background: var(--white);
+      border-color: rgba(22, 38, 90, .28);
+      outline: 0;
+    }
+
+    .cost-row .payment-input[data-cost-field="item"],
+    .cost-row select[data-cost-field="category"] {
+      width: 100%;
+    }
+
+    .payment-pending {
+      color: var(--muted);
+    }
+
+    .payment-link {
+      justify-self: start;
+    }
+
+    .payroll-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .finance-table-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .finance-table-head {
+      flex-wrap: wrap;
+    }
+
+    .payroll-download {
+      width: 38px;
+      min-height: 38px;
+      padding: 0;
     }
 
     /* === Shots topbar project selector === */
@@ -1745,43 +3382,9 @@
             <span class="nav-icon" data-icon="dashboard"></span>
             <span class="nav-label">Dashboard</span>
           </button>
-          <button class="nav-btn" data-section="projects">
-            <span class="nav-icon" data-icon="notebook"></span>
-            <span class="nav-label">Projects</span>
-          </button>
           <button class="nav-btn" data-section="shots">
             <span class="nav-icon" data-icon="frames"></span>
             <span class="nav-label">Shots</span>
-          </button>
-          <button class="nav-btn" data-section="timeline">
-            <span class="nav-icon" data-icon="calendar"></span>
-            <span class="nav-label">Timeline</span>
-          </button>
-        </div>
-        <div class="nav-group">
-          <div class="nav-heading">Finances</div>
-          <button class="nav-btn" data-section="payments">
-            <span class="nav-icon" data-icon="wallet"></span>
-            <span class="nav-label">Payments</span>
-          </button>
-          <button class="nav-btn" data-section="quotation">
-            <span class="nav-icon" data-icon="calculator"></span>
-            <span class="nav-label">Quotation generator</span>
-          </button>
-          <button class="nav-btn" data-section="accounting">
-            <span class="nav-icon" data-icon="ledger"></span>
-            <span class="nav-label">Accounting</span>
-          </button>
-        </div>
-        <div class="nav-group">
-          <div class="nav-heading">Team</div>
-          <button class="nav-btn" data-section="members">
-            <span class="nav-icon" data-icon="user"></span>
-            <span class="nav-label">Members</span>
-          </button>
-          <button class="nav-btn" data-section="credits">
-            <span class="nav-icon" data-icon="flag"></span>
-            <span class="nav-label">Credits</span>
           </button>
         </div>
       </nav>
@@ -1801,7 +3404,7 @@
           <div id="topbarDefault">
             <p class="kicker">Sagui Studio · Production command center</p>
             <h1>Track films, reels, scenes, and shots without drowning in spreadsheets.</h1>
-            <p>A lean prototype focused only on production management: project overview, pipeline progress, shot tracking, weekly timeline, and status risks.</p>
+            <p>A lean prototype focused on the dashboard overview and the full shots workspace.</p>
           </div>
           <div id="topbarShots" style="display:none">
             <p class="kicker">Sagui Studio · Shots</p>
@@ -1834,85 +3437,116 @@
         <div class="project-grid" id="projectGrid"></div>
       </section>
 
-      <section id="projects" class="section">
-        <div class="toolbar">
-          <div class="filters">
-            <select id="detailProject"></select>
-          </div>
-          <button class="btn primary" data-jump="shots" type="button">Open shot tracker</button>
-        </div>
-        <div class="detail-layout">
-          <div>
-            <div class="panel">
-              <h2 id="detailTitle">Project</h2>
-              <div class="mini-grid" id="detailMeta"></div>
-            </div>
-            <div class="panel">
-              <h2>Pipeline progress</h2>
-              <div class="stage-list" id="detailPipeline"></div>
-            </div>
-          </div>
-          <div>
-            <div class="panel">
-              <h2>Next production alerts</h2>
-              <div id="detailAlerts"></div>
-            </div>
-            <div class="panel">
-              <h2>Key milestones</h2>
-              <div class="timeline" id="detailTimeline"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section id="shots" class="section">
         <div class="shots-cover" id="shotsCover" style="display:none"></div>
-        <div class="metric-grid" id="shotMetrics"></div>
-        <div id="shotProgressSummary"></div>
-        <div class="toolbar">
-          <div class="filters">
-            <select id="shotStatus">
-              <option value="all">All statuses</option>
-              <option value="Approved">Approved</option>
-              <option value="In progress">In progress</option>
-              <option value="Review">Review</option>
-              <option value="Render pending">Render pending</option>
-            </select>
-            <select id="shotArtist"></select>
-            <select id="shotLead" aria-label="Filter by lead"><option value="all">All leads</option></select>
-            <input id="shotSearch" placeholder="Search scene, shot, artist, file">
-            <button class="btn" id="clearShotFiltersBtn" type="button">Clear filter</button>
+        <div class="shot-tabs" role="tablist" aria-label="Project workspace">
+          <button class="shot-tab active" type="button" data-shot-tab="shots"><span class="shot-tab-icon" data-icon="frames"></span>Shots</button>
+          <button class="shot-tab" type="button" data-shot-tab="details"><span class="shot-tab-icon" data-icon="notebook"></span>Details</button>
+          <button class="shot-tab" type="button" data-shot-tab="schedule"><span class="shot-tab-icon" data-icon="calendar"></span>Schedule</button>
+          <button class="shot-tab" type="button" data-shot-tab="finances"><span class="shot-tab-icon" data-icon="wallet"></span>Finances</button>
+          <button class="shot-tab" type="button" data-shot-tab="team"><span class="shot-tab-icon" data-icon="user"></span>Team</button>
+        </div>
+        <div class="shot-tab-panel active" data-shot-panel="shots">
+          <div class="roll-tabs" id="rollTabs" role="tablist" aria-label="Roll workspace"></div>
+          <div class="metric-grid" id="shotMetrics"></div>
+          <div id="shotProgressSummary"></div>
+          <div class="toolbar">
+            <div class="filters">
+              <select id="shotStatus">
+                <option value="all">All statuses</option>
+                <option value="Approved">Approved</option>
+                <option value="In progress">In progress</option>
+                <option value="Review">Review</option>
+                <option value="Render pending">Render pending</option>
+              </select>
+              <select id="shotArtist"></select>
+              <select id="shotLead" aria-label="Filter by lead"><option value="all">All leads</option></select>
+              <input id="shotSearch" placeholder="Search scene, shot, artist, file">
+              <button class="btn" id="clearShotFiltersBtn" type="button">Clear filter</button>
+            </div>
+            <div class="filters">
+              <button class="btn icon-btn" id="downloadExcelBtn" type="button" aria-label="Download Excel sheet" title="Download Excel sheet" data-icon="download"></button>
+              <button class="btn icon-btn" id="expandAllShotsBtn" type="button" aria-label="Expand all scenes" title="Expand all scenes" data-icon="expand"></button>
+              <button class="btn icon-btn" id="collapseAllShotsBtn" type="button" aria-label="Collapse all scenes" title="Collapse all scenes" data-icon="collapse"></button>
+              <button class="btn primary" id="addShotBtn" type="button">Add Scene</button>
+            </div>
           </div>
-          <div class="filters">
-            <button class="btn icon-btn" id="downloadExcelBtn" type="button" aria-label="Download Excel sheet" title="Download Excel sheet" data-icon="download"></button>
-            <button class="btn icon-btn" id="expandAllShotsBtn" type="button" aria-label="Expand all scenes" title="Expand all scenes" data-icon="expand"></button>
-            <button class="btn icon-btn" id="collapseAllShotsBtn" type="button" aria-label="Collapse all scenes" title="Collapse all scenes" data-icon="collapse"></button>
-            <button class="btn primary" id="addShotBtn" type="button">Add Scene</button>
+          <div class="shot-sheet" id="shotSheet"></div>
+        </div>
+        <div class="shot-tab-panel" data-shot-panel="details">
+          <div class="team-workspace" id="projectDetailsWorkspace"></div>
+        </div>
+        <div class="shot-tab-panel" data-shot-panel="schedule">
+          <div class="schedule-workspace" id="scheduleWorkspace"></div>
+        </div>
+        <div class="shot-tab-panel" data-shot-panel="finances">
+          <div class="team-workspace" id="financeWorkspace"></div>
+        </div>
+        <div class="shot-tab-panel" data-shot-panel="team">
+          <div class="team-workspace">
+            <div class="metric-grid" id="teamMetrics"></div>
+            <div class="team-layout">
+              <div class="team-board-stack">
+                <div class="team-panel">
+                  <div class="team-panel-head">
+                    <h2>Animation board</h2>
+                    <div class="board-toggle" aria-label="Animation board period">
+                      <button type="button" data-animation-board-mode="week">Week</button>
+                      <button type="button" data-animation-board-mode="month">Month</button>
+                      <button class="active" type="button" data-animation-board-mode="total">Total</button>
+                    </div>
+                  </div>
+                  <div class="animator-board" id="animatorBoard"></div>
+                </div>
+                <div class="team-panel">
+                  <div class="team-panel-head">
+                    <h2>Environment board</h2>
+                    <div class="board-toggle" aria-label="Environment board period">
+                      <button type="button" data-environment-board-mode="week">Week</button>
+                      <button type="button" data-environment-board-mode="month">Month</button>
+                      <button class="active" type="button" data-environment-board-mode="total">Total</button>
+                    </div>
+                  </div>
+                  <div class="animator-board" id="environmentBoard"></div>
+                </div>
+                <div class="team-panel">
+                  <div class="team-panel-head">
+                    <h2>Members info</h2>
+                  </div>
+                  <div class="member-insights" id="memberInsights"></div>
+                </div>
+              </div>
+              <div class="team-panel">
+                <div class="team-panel-head">
+                  <h2>Project members</h2>
+                  <button class="btn primary" id="addTeamMemberBtn" type="button">Add Member</button>
+                </div>
+                <div class="team-filters">
+                  <input id="teamSearch" placeholder="Search member name" aria-label="Search member name">
+                  <select id="teamRoleFilter" aria-label="Filter member role"></select>
+                </div>
+                <div class="team-sheet">
+                  <div class="team-member-header">
+                    <span></span>
+                    <span>Name</span>
+                    <span>Role</span>
+                    <span>E-mail</span>
+                    <span>Phone number</span>
+                    <span>State of living</span>
+                    <span>Birthday</span>
+                    <span>Permission</span>
+                    <span>Start date</span>
+                    <span>End date</span>
+                    <span>Contract Status</span>
+                  </div>
+                  <div class="team-member-list" id="teamMemberList"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="shot-sheet" id="shotSheet"></div>
       </section>
 
-      <section id="timeline" class="section">
-        <div class="toolbar">
-          <strong>Studio timeline</strong>
-          <div class="filters">
-            <select id="timelineProject">
-              <option value="all">All projects</option>
-            </select>
-          </div>
-        </div>
-        <div class="panel">
-          <h2>Weekly and reel-based milestones</h2>
-          <div class="timeline" id="studioTimeline"></div>
-        </div>
-      </section>
-
-      <section id="payments" class="section"></section>
-      <section id="quotation" class="section"></section>
-      <section id="accounting" class="section"></section>
-      <section id="members" class="section"></section>
-      <section id="credits" class="section"></section>
     </main>
   </div>
 
@@ -2041,6 +3675,7 @@
       download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/><path d="M6 17v4"/><path d="M18 17v4"/></svg>',
       expand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5"/><path d="M16 3h5v5"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/><path d="m3 3 7 7"/><path d="m21 3-7 7"/><path d="m21 21-7-7"/><path d="m3 21 7-7"/></svg>',
       collapse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v7H3"/><path d="M14 3v7h7"/><path d="M14 21v-7h7"/><path d="M10 21v-7H3"/><path d="m3 10 7-7"/><path d="m21 10-7-7"/><path d="m21 14-7 7"/><path d="m3 14 7 7"/></svg>',
+      image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m21 15-5-5L5 19"/></svg>',
       brush: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7L15.3 4.9a2.2 2.2 0 0 1 3.1 0l.7.7a2.2 2.2 0 0 1 0 3.1L8.7 19.1 3 21Z"/><path d="m13.5 6.7 3.8 3.8"/><path d="M10 21h11"/></svg>'
     };
 
@@ -2048,10 +3683,11 @@
       projects: [
         {
           id: "amadeo",
-          name: "Amadeo",
+          name: "Amadeo e O Hipot\u00e9tico Mundo Novo",
           type: "Animated short film",
           deadline: "2026-02-20",
           phase: "Animation and render",
+          startDate: "2025-01-06",
           status: "attention",
           pipeline: { Script: 100, Storyboard: 100, Animatic: 95, Design: 90, Modeling: 75, "Rig/setup": 68, Animation: 38, Sync: 42, Render: 18, Delivery: 0 },
           timeline: [
@@ -2061,6 +3697,12 @@
             ["Jul 2025", "Animation corrections for reels 2 and 3", 52],
             ["Aug 2025", "Backgrounds and cut-out animation for reels 4 and 5", 36],
             ["Sep 2025", "Reel 4 render and general review", 22]
+          ],
+          documents: [
+            { title: "Script", type: "Script", note: "Latest Amadeo screenplay draft", url: "#" },
+            { title: "Concept art board", type: "Concept art", note: "Characters, backgrounds and visual references", url: "#" },
+            { title: "Context videos", type: "Reference", note: "Video references for acting and motion timing", url: "#" },
+            { title: "Project presentation", type: "Presentation", note: "Pitch and production deck", url: "#" }
           ]
         },
         {
@@ -2117,16 +3759,196 @@
 
     let data = loadData();
     const selectedShotIds = new Set();
+    const selectedTeamMemberIndexes = new Set();
     let selectedThumbnailShotId = "";
     let recentlyMovedShotIds = new Set();
+    let recentlyAddedShotIds = new Set();
     let wizardStep = 0;
+    let detailsEditMode = false;
+    let documentationEditMode = false;
+    let animationBoardMode = "total";
+    let environmentBoardMode = "total";
+    let activeRollId = "";
+    let financePaymentSearch = "";
+    let financePaymentRole = "all";
+    let financePaymentMonth = defaultFinanceMonth();
+    let financePaymentSort = "none";
+    let financeTableTab = "payroll";
+    let financeEditMode = false;
+    let financeCostSearch = "";
+    let financeCostCategory = "all";
+    let financeCostMonth = defaultFinanceMonth();
+    let financeCostSort = "none";
+    const selectedPaymentIndexes = new Set();
+    const selectedCostIndexes = new Set();
+    const financePieHighlights = {};
     const defaultProjectStages = ["Concept", "Script", "Storyboard", "Design", "Rig", "Animation", "Sync", "Render", "Delivery"];
+    const projectRoles = ["Director", "Art director", "Animation director", "Animation assistant", "Animator", "Setup artist", "Background artist", "Background supervisor", "Compositor", "Editor", "Producer"];
+    const costCategories = ["Storage", "Software", "Equipment", "Hardware", "Cloud render", "Audio", "Legal", "Marketing", "Travel", "Operations", "Taxes", "Other"];
+    const scheduleMonths = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+    const amadeoSchedule = [
+      { stage: "Pre-production", kind: "active", months: { Jan: "Script polish", Fev: "Storyboard / animatic", Mar: "Design, planning and crew setup" } },
+      { stage: "Production", kind: "production", months: {
+        Abr: "Render correction reels 1-2; RAF Reel 4; setup Reel 3",
+        Mai: "Reel 4 RAF; Reel 3 render; animation correction Reel 3",
+        Jun: "Reel 5 RAF; Reel 3 render; setup Reel 4; BG Reel 5",
+        Jul: "Render correction Reel 3; setup Reel 5; BG Reel 5",
+        Ago: "Render Reel 4; setup Reel 5; cut-out animation Reel 4",
+        Set: "Render Reel 4; animation correction Reel 4; cut-out animation Reel 5"
+      } },
+      { stage: "Post-production", kind: "post", months: { Out: "Final render corrections and comp pass", Nov: "Editing, sound, sync and final review" } },
+      { stage: "Accountability", kind: "accountability", months: { Dez: "Accessibility package, delivery and prestação de contas" } }
+    ];
 
     function loadData() {
       const stored = localStorage.getItem(storeKey);
       const loaded = stored ? JSON.parse(stored) : structuredClone(seedData);
       loaded.sceneLeads = loaded.sceneLeads || {};
+      const amadeo = loaded.projects.find(project => project.id === "amadeo");
+      if (amadeo) amadeo.name = "Amadeo e O Hipotético Mundo Novo";
+      loaded.projects.forEach(project => {
+        if (project.id === "amadeo") project.code = "AEOH";
+        project.description = project.description || "";
+        project.startDate = project.startDate || "";
+        project.documents = project.documents || defaultProjectDocuments(project);
+        const financeDefaults = defaultProjectFinance(project);
+        project.finance = project.finance || financeDefaults;
+        project.finance.profitPercent = project.finance.profitPercent ?? financeDefaults.profitPercent ?? 0;
+        project.finance.incomeSources = project.finance.incomeSources || financeDefaults.incomeSources;
+        project.finance.spending = project.finance.spending || financeDefaults.spending;
+        project.finance.costs = project.finance.costs || financeDefaults.costs || [];
+          project.finance.payments = project.finance.payments || financeDefaults.payments;
+          project.finance.payments.forEach(payment => {
+            payment.receipt = payment.receipt || "#";
+          });
+          if (Array.isArray(project.crew)) {
+          project.crew.forEach((person, index) => {
+            person.startDate = person.startDate || "";
+            person.endDate = person.endDate || "";
+            person.status = person.status || "Active";
+            person.permission = person.permission || "Member";
+            person.email = person.email || "email@studio.com";
+            person.phone = person.phone || "+55 00 00000-0000";
+            person.state = person.state || defaultMemberState(index);
+            person.birthday = person.birthday || defaultMemberBirthday(index);
+          });
+        }
+      });
+      loaded.shots?.forEach(shot => {
+        const project = loaded.projects.find(item => item.id === shot.project);
+        const code = String(project?.code || "").toUpperCase();
+        if (code && shot.project === "amadeo" && !String(shot.code || "").startsWith(`${code}_`)) {
+          shot.code = String(shot.code || "")
+            .replace(/^(AMADEO|AMA)(?=_)/i, code)
+            .replace(/^([^_]+)_/, `${code}_`);
+        }
+      });
       return loaded;
+    }
+
+    function defaultProjectDocuments(project) {
+      if (project.id === "amadeo") {
+        return [
+          { title: "Script", type: "Script", note: "Latest Amadeo screenplay draft", url: "#" },
+          { title: "Concept art board", type: "Concept art", note: "Characters, backgrounds and visual references", url: "#" },
+          { title: "Context videos", type: "Reference", note: "Video references for acting and motion timing", url: "#" },
+          { title: "Project presentation", type: "Presentation", note: "Pitch and production deck", url: "#" }
+        ];
+      }
+      return [
+        { title: "Script", type: "Script", note: "Project script file", url: "#" },
+        { title: "Concept art", type: "Concept art", note: "Visual development and references", url: "#" },
+        { title: "Context videos", type: "Reference", note: "Research and motion references", url: "#" },
+        { title: "Presentation", type: "Presentation", note: "Project deck", url: "#" }
+      ];
+    }
+
+    function financeMonthOptions() {
+      return [
+        { value: "2025-09", label: "Sep", year: "2025" },
+        { value: "2025-10", label: "Oct", year: "2025" },
+        { value: "2025-11", label: "Nov", year: "2025" },
+        { value: "2025-12", label: "Dec", year: "2025" },
+        { value: "2026-01", label: "Jan", year: "2026" },
+        { value: "2026-02", label: "Feb", year: "2026" },
+        { value: "2026-03", label: "Mar", year: "2026" },
+        { value: "2026-04", label: "Apr", year: "2026" },
+        { value: "2026-05", label: "May", year: "2026" }
+      ];
+    }
+
+    function defaultFinanceMonth() {
+      const months = financeMonthOptions();
+      const current = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+      return months.some(month => month.value === current) ? current : months.at(-1).value;
+    }
+
+    function financeMonthLabel(value) {
+      const month = financeMonthOptions().find(item => item.value === value);
+      return month ? `${month.label} ${month.year}` : financeMonthLabel(defaultFinanceMonth());
+    }
+
+    function defaultMemberState(index = 0) {
+      return ["São Paulo", "Sergipe", "Pernambuco", "São Paulo", "Pernambuco", "Sergipe"][index % 6];
+    }
+
+    function defaultMemberBirthday(index = 0) {
+      return ["1990-03-18", "1988-07-04", "1994-11-22", "1992-09-10", "1996-12-05", "1989-05-29"][index % 6];
+    }
+
+    function defaultProjectFinance(project) {
+      if (project.id === "amadeo") {
+        return {
+          budget: 180000,
+          profitPercent: 5,
+          spent: 68500,
+          incomeSources: [
+            { label: "Public grant", amount: 81000, color: "var(--pink)" },
+            { label: "Studio investment", amount: 45000, color: "#7ab8f2" },
+            { label: "Co-production", amount: 32400, color: "#ffd66b" },
+            { label: "Private sponsor", amount: 21600, color: "#77c987" }
+          ],
+          spending: [
+            { label: "Animators", amount: 37200, color: "var(--pink)" },
+            { label: "Directors", amount: 18800, color: "#7ab8f2" },
+            { label: "Environment artists", amount: 8200, color: "#ffd66b" },
+            { label: "Taxes", amount: 4300, color: "#77c987" }
+          ],
+          costs: [
+            { item: "Cloud storage", category: "Storage", paid: 1800, total: 2400, month: "2025-09", receipt: "#" },
+            { item: "Software licenses", category: "Software", paid: 3200, total: 4200, month: "2025-10", receipt: "#" },
+            { item: "Equipment rental", category: "Equipment", paid: 1500, total: 3000, month: "2025-11", receipt: "#" }
+          ],
+          payments: [
+            { member: "Flávio Veras", role: "Art director", unit: "Fixed amount", paid: 11800, total: 16000, month: "2025-09", contract: "#", receipt: "#" },
+            { member: "Gabriel Vieira", role: "Animator", unit: "Per second", paid: 9200, total: 12000, month: "2025-10", contract: "#", receipt: "#" },
+            { member: "Camila Souza", role: "Animator", unit: "Per second", paid: 6400, total: 9000, month: "2025-11", contract: "#", receipt: "#" },
+            { member: "Murilo Carvalho", role: "Animator", unit: "Per second", paid: 5200, total: 7300, month: "2025-12", contract: "#", receipt: "#" },
+            { member: "Dani Souza", role: "Animator", unit: "Per second", paid: 4300, total: 6200, month: "2026-01", contract: "#", receipt: "#" }
+          ]
+        };
+      }
+      return {
+        budget: 90000,
+        profitPercent: 5,
+        spent: 24000,
+        incomeSources: [
+          { label: "Client funded", amount: 54000, color: "var(--pink)" },
+          { label: "Studio", amount: 27000, color: "#7ab8f2" },
+          { label: "Other", amount: 9000, color: "#ffd66b" }
+        ],
+        spending: [
+          { label: "Animators", amount: 14000, color: "var(--pink)" },
+          { label: "Directors", amount: 6000, color: "#7ab8f2" },
+          { label: "Environment artists", amount: 3000, color: "#ffd66b" },
+          { label: "Taxes", amount: 1000, color: "#77c987" }
+        ],
+        costs: [
+          { item: "Cloud storage", category: "Storage", paid: 900, total: 1200, month: "2025-09", receipt: "#" },
+          { item: "Software licenses", category: "Software", paid: 1800, total: 2400, month: "2025-10", receipt: "#" }
+        ],
+        payments: []
+      };
     }
 
     function saveData(showToast = true) {
@@ -2163,6 +3985,17 @@
       return new Date(value + "T12:00:00").toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
     }
 
+    function weeksBetween(from, to) {
+      if (!to) return 0;
+      const end = new Date(`${to}T12:00:00`);
+      const start = from instanceof Date ? from : new Date(`${from}T12:00:00`);
+      return Math.max(0, Math.ceil((end - start) / (1000 * 60 * 60 * 24 * 7)));
+    }
+
+    function remainingWeeksForProject(project) {
+      return project?.id === "amadeo" ? 31 : weeksBetween(today, project?.deadline);
+    }
+
     function statusBadge(status) {
       const map = {
         on: ["ok", "On track"],
@@ -2195,9 +4028,10 @@
       document.getElementById("projectGrid").innerHTML = projects.map(projectCard).join("");
       document.querySelectorAll("[data-open-project]").forEach(button => {
         button.addEventListener("click", () => {
-          document.getElementById("detailProject").value = button.dataset.openProject;
-          switchSection("projects");
-          renderProjectDetail();
+          document.getElementById("shotProject").value = button.dataset.openProject;
+          activeRollId = "";
+          switchSection("shots");
+          renderShots();
         });
       });
     }
@@ -2266,17 +4100,24 @@
     function fillProjectSelects() {
       const options = data.projects.map(project => `<option value="${project.id}">${project.name}</option>`).join("");
       ["detailProject", "shotProject"].forEach(id => {
-        const current = document.getElementById(id).value;
-        document.getElementById(id).innerHTML = options;
-        if (current) document.getElementById(id).value = current;
+        const select = document.getElementById(id);
+        if (!select) return;
+        const current = select.value;
+        select.innerHTML = options;
+        if (current) select.value = current;
       });
-      const timelineCurrent = document.getElementById("timelineProject").value;
-      document.getElementById("timelineProject").innerHTML = `<option value="all">All projects</option>${options}`;
-      if (timelineCurrent) document.getElementById("timelineProject").value = timelineCurrent;
+      const timelineSelect = document.getElementById("timelineProject");
+      if (timelineSelect) {
+        const timelineCurrent = timelineSelect.value;
+        timelineSelect.innerHTML = `<option value="all">All projects</option>${options}`;
+        if (timelineCurrent) timelineSelect.value = timelineCurrent;
+      }
     }
 
     function renderProjectDetail() {
-      const id = document.getElementById("detailProject").value || data.projects[0].id;
+      const detailSelect = document.getElementById("detailProject");
+      if (!detailSelect) return;
+      const id = detailSelect.value || data.projects[0].id;
       const project = data.projects.find(item => item.id === id);
       const projectShots = data.shots.filter(shot => shot.project === id);
       const reviewCount = projectShots.filter(shot => shot.animStatus === "Review").length;
@@ -2308,49 +4149,162 @@
       return `<p><span class="status-dot ${tone}"></span> <strong>${value}</strong> ${label}</p>`;
     }
 
+    function defaultRolls() {
+      return Array.from({ length: 4 }, (_, index) => ({
+        id: `roll-${index + 1}`,
+        name: `Roll ${index + 1}`
+      }));
+    }
+
+    function rollStorageKey(projectId) {
+      return `sagui-active-roll-${projectId}`;
+    }
+
+    function ensureProjectRolls(projectId) {
+      const project = data.projects.find(item => item.id === projectId);
+      if (!project) return [];
+      let changed = false;
+      if (!Array.isArray(project.rolls) || !project.rolls.length) {
+        project.rolls = defaultRolls();
+        changed = true;
+      }
+      const rollIds = new Set(project.rolls.map(roll => roll.id));
+      data.shots.forEach(shot => {
+        if (shot.project !== projectId) return;
+        if (!shot.roll || !rollIds.has(shot.roll)) {
+          shot.roll = project.rolls[0].id;
+          changed = true;
+        }
+      });
+      const storedRoll = localStorage.getItem(rollStorageKey(projectId));
+      if (!activeRollId || !rollIds.has(activeRollId)) {
+        activeRollId = rollIds.has(storedRoll) ? storedRoll : project.rolls[0].id;
+      }
+      if (changed) saveData(false);
+      return project.rolls;
+    }
+
+    function activeRollForProject(projectId) {
+      const rolls = ensureProjectRolls(projectId);
+      if (!rolls.length) return "";
+      if (!rolls.some(roll => roll.id === activeRollId)) activeRollId = rolls[0].id;
+      return activeRollId;
+    }
+
+    function renderRollTabs(projectId) {
+      const rolls = ensureProjectRolls(projectId);
+      const container = document.getElementById("rollTabs");
+      if (!container) return;
+      const active = activeRollForProject(projectId);
+      container.innerHTML = `
+        ${rolls.map(roll => `
+          <button class="roll-tab ${roll.id === active ? "active" : ""}" type="button" data-roll-id="${escapeAttr(roll.id)}">${escapeHtml(roll.name)}</button>
+        `).join("")}
+        <span class="roll-actions">
+          <details class="roll-manager">
+            <summary>Edit Rolls</summary>
+            <div class="roll-menu">
+              <p class="roll-menu-title">Project rolls</p>
+              <div class="roll-menu-list">
+                ${rolls.map(roll => `
+                  <div class="roll-menu-row ${roll.id === active ? "active" : ""}">
+                    <span>${escapeHtml(roll.name)}</span>
+                    <button class="roll-menu-delete" type="button" data-delete-roll-id="${escapeAttr(roll.id)}" ${rolls.length <= 1 ? "disabled" : ""}>Delete</button>
+                  </div>
+                `).join("")}
+              </div>
+              <button class="roll-menu-add" id="addRollBtn" type="button">Add Roll</button>
+            </div>
+          </details>
+        </span>
+      `;
+    }
+
+    function addRoll(projectId) {
+      const project = data.projects.find(item => item.id === projectId);
+      if (!project) return;
+      const rolls = ensureProjectRolls(projectId);
+      const usedNames = new Set(rolls.map(roll => roll.name));
+      let index = rolls.length + 1;
+      while (usedNames.has(`Roll ${index}`)) index += 1;
+      const roll = { id: `roll-${Date.now().toString(36)}`, name: `Roll ${index}` };
+      project.rolls.push(roll);
+      activeRollId = roll.id;
+      localStorage.setItem(rollStorageKey(projectId), activeRollId);
+      selectedShotIds.clear();
+      saveData(false);
+      renderShots();
+      toast(`${roll.name} added.`);
+    }
+
+    function deleteRoll(projectId, rollId) {
+      const project = data.projects.find(item => item.id === projectId);
+      if (!project) return;
+      const rolls = ensureProjectRolls(projectId);
+      if (rolls.length <= 1) {
+        toast("Keep at least one roll in the project.");
+        return;
+      }
+      const roll = rolls.find(item => item.id === rollId);
+      if (!roll) return;
+      const count = data.shots.filter(shot => shot.project === projectId && shot.roll === roll.id).length;
+      if (!window.confirm(`Delete ${roll.name} and ${count} take${count === 1 ? "" : "s"} inside it?`)) return;
+      project.rolls = rolls.filter(item => item.id !== roll.id);
+      data.shots = data.shots.filter(shot => !(shot.project === projectId && shot.roll === roll.id));
+      if (activeRollId === roll.id) activeRollId = project.rolls[0].id;
+      localStorage.setItem(rollStorageKey(projectId), activeRollId);
+      selectedShotIds.clear();
+      if (!data.shots.some(shot => shot.id === selectedThumbnailShotId)) selectedThumbnailShotId = "";
+      saveData(false);
+      renderDashboard();
+      renderProjectDetail();
+      renderTimeline();
+      renderShots();
+      toast(`${roll.name} deleted.`);
+    }
+
     function renderShots() {
       const project = document.getElementById("shotProject").value || data.projects[0].id;
       updateShotsCover(project);
+      renderRollTabs(project);
+      const activeRoll = activeRollForProject(project);
       const status = document.getElementById("shotStatus").value;
       const previousArtist = document.getElementById("shotArtist").value || "all";
-            const previousLead = document.getElementById("shotLead")?.value || "all";
-const search = document.getElementById("shotSearch").value.toLowerCase();
-      const artists = [...new Set(data.shots.map(shot => shot.artist))].sort();
+      const previousLead = document.getElementById("shotLead")?.value || "all";
+      const search = document.getElementById("shotSearch").value.toLowerCase();
+      const rollShots = data.shots.filter(shot => shot.project === project && shot.roll === activeRoll);
+      const artists = [...new Set(rollShots.map(shot => shot.artist))].sort();
       document.getElementById("shotArtist").innerHTML = `<option value="all">All artists</option>${artists.map(artist => `<option>${artist}</option>`).join("")}`;
       document.getElementById("shotArtist").value = previousArtist;
 
-            const leads = [...new Set(Object.entries(data.sceneLeads || {})
-        .filter(([key, lead]) => key.startsWith(`${project}::`) && lead)
-        .map(([, lead]) => lead))].sort();
+      const leads = [...new Set(rollShots.map(shot => sceneLead(project, shot.scene, activeRoll)).filter(Boolean))].sort();
       const leadSelect = document.getElementById("shotLead");
       leadSelect.innerHTML = `<option value="all">All leads</option>${leads.map(lead => `<option>${lead}</option>`).join("")}`;
       leadSelect.value = leads.includes(previousLead) ? previousLead : "all";
       const activeLead = leadSelect.value || "all";
-const rows = data.shots.filter(shot => {
+      const rows = rollShots.filter(shot => {
         const text = `${shot.scene} ${shot.code} ${shot.artist} ${shot.file}`.toLowerCase();
         const statusMatch = status === "all" || shot.animStatus === status || shot.renderStatus === status;
         const artistMatch = previousArtist === "all" || shot.artist === previousArtist;
-        const leadMatch = activeLead === "all" || sceneLead(project, shot.scene) === activeLead;
-        return shot.project === project && statusMatch && artistMatch && leadMatch && text.includes(search);
+        const leadMatch = activeLead === "all" || sceneLead(project, shot.scene, activeRoll) === activeLead;
+        return statusMatch && artistMatch && leadMatch && text.includes(search);
       });
 
       const seconds = rows.reduce((sum, shot) => sum + Number(shot.seconds || 0), 0);
       const totalTargetSeconds = 400;
       const leftToAnimate = Math.max(totalTargetSeconds - seconds, 0);
       const approved = rows.filter(shot => shot.animStatus === "Approved");
+      const renderPending = rows.filter(shot => shot.renderStatus === "Render pending").length;
       document.getElementById("shotMetrics").innerHTML = [
         metric("Filtered shots", rows.length, projectName(project), "frames"),
-        metric("Approved shots", approved.length, "Animation approved", "check"),
+        metric("Approved shots", `${approved.length}/${rows.length}`, "Animation approved", "check"),
         metric("Total seconds", `${leftToAnimate}/${totalTargetSeconds} seg`, "Left to animate", "clock"),
-        metric("Render pending", rows.filter(shot => shot.renderStatus === "Render pending").length, "Waiting for final output", "alert")
+        metric("Render pending", `${rows.length - renderPending}/${rows.length}`, "Waiting for final output", "alert")
       ].join("");
       document.getElementById("shotProgressSummary").innerHTML = shotProgressSummary(rows);
 
       const groups = groupByScene(rows);
-      document.getElementById("shotSheet").innerHTML = groups.map((group, index) => {
-        const addScene = index < groups.length - 1 ? sceneAddButton(group.scene) : "";
-        return `${sceneGroup(group)}${addScene}`;
-      }).join("");
+      document.getElementById("shotSheet").innerHTML = groups.map(group => `${sceneGroup(group)}${sceneAddButton(group.scene)}`).join("");
       bindShotInputs();
       bindShotLinks();
       bindShotSelection();
@@ -2359,6 +4313,850 @@ const rows = data.shots.filter(shot => {
       bindSceneContextMenus();
       bindSceneLeads();
       bindSceneToggles();
+      bindSceneDrag();
+      renderTeam();
+      renderDetails();
+      renderSchedule();
+      renderFinances();
+    }
+
+    function renderTeam() {
+      const projectId = document.getElementById("shotProject").value || data.projects[0].id;
+      const crew = projectCrew(projectId);
+      const projectShots = data.shots.filter(shot => shot.project === projectId);
+      const search = (document.getElementById("teamSearch")?.value || "").toLowerCase();
+      const roleFilter = document.getElementById("teamRoleFilter")?.value || "all";
+      const filteredCrew = crew.filter(person => {
+        const nameMatch = !search || String(person.member || "").toLowerCase().includes(search);
+        const roleMatch = roleFilter === "all" || person.role === roleFilter;
+        return nameMatch && roleMatch;
+      });
+      const counts = crew.reduce((map, person) => {
+        const stage = roleStage(person.role);
+        map[stage] = (map[stage] || 0) + 1;
+        return map;
+      }, {});
+
+      document.getElementById("teamMetrics").innerHTML = [
+        metric("Members", crew.length, "Assigned to this project", "user"),
+        metric("Directors", counts.directors || 0, "Direction and supervision", "flag"),
+        metric("Animation", counts.animation || 0, "Animators and assistants", "frames"),
+        metric("Background / Setup", (counts.background || 0) + (counts.setup || 0), "BG and rig/setup crew", "brush")
+      ].join("");
+
+      document.getElementById("teamRoleFilter").innerHTML = `<option value="all">All roles</option>${projectRoles.map(role => `<option ${role === roleFilter ? "selected" : ""}>${role}</option>`).join("")}`;
+      [...selectedTeamMemberIndexes].forEach(index => {
+        if (!crew[index]) selectedTeamMemberIndexes.delete(index);
+      });
+      document.getElementById("teamMemberList").innerHTML = filteredCrew.length
+        ? filteredCrew.map(person => teamMemberRow(person, crew.indexOf(person))).join("")
+        : `<p class="team-empty">No members assigned yet.</p>`;
+
+      document.querySelectorAll("[data-animation-board-mode]").forEach(button => button.classList.toggle("active", button.dataset.animationBoardMode === animationBoardMode));
+      document.querySelectorAll("[data-environment-board-mode]").forEach(button => button.classList.toggle("active", button.dataset.environmentBoardMode === environmentBoardMode));
+      document.getElementById("animatorBoard").innerHTML = animationBoard(projectShots, animationBoardMode);
+      document.getElementById("environmentBoard").innerHTML = environmentBoard(environmentBoardMode);
+      document.getElementById("memberInsights").innerHTML = memberInsights(crew);
+    }
+
+    function memberInsights(crew) {
+      const stateRows = [...crew.reduce((map, person) => {
+        const state = person.state || "Not set";
+        map.set(state, (map.get(state) || 0) + 1);
+        return map;
+      }, new Map())]
+        .sort((a, b) => b[1] - a[1])
+        .map(([state, count]) => `<div class="member-insight-row"><strong>${escapeHtml(state)}</strong><b>${count}</b></div>`)
+        .join("");
+      const oldestRows = [...crew]
+        .filter(person => person.birthday)
+        .sort((a, b) => new Date(a.birthday) - new Date(b.birthday))
+        .slice(0, 3)
+        .map(person => `<div class="member-insight-row"><strong>${escapeHtml(person.member || "Member name")}</strong><b>${ageFromBirthday(person.birthday)}</b></div>`)
+        .join("");
+      const nextBirthday = [...crew]
+        .filter(person => person.birthday)
+        .sort((a, b) => daysUntilBirthday(a.birthday) - daysUntilBirthday(b.birthday))[0];
+      return `
+        <div class="member-insight-block">
+          <span>Members per state</span>
+          ${stateRows || `<p class="team-empty">No states set yet.</p>`}
+        </div>
+        <div class="member-insight-block">
+          <span>3 oldest members</span>
+          ${oldestRows || `<p class="team-empty">No birthdays set yet.</p>`}
+        </div>
+        <div class="member-insight-block">
+          <span>Next birthday</span>
+          ${nextBirthday ? `<div class="member-insight-row"><strong>${escapeHtml(nextBirthday.member || "Member name")}</strong><b>${dateDisplay(nextBirthday.birthday)}</b></div>` : `<p class="team-empty">No birthday dates yet.</p>`}
+        </div>
+      `;
+    }
+
+    function renderDetails() {
+      const project = currentShotsProject();
+      if (!project) return;
+      const code = project.code || projectInitialsFromName(project.name);
+      const description = project.description || "Project description";
+      const detailBody = detailsEditMode ? `
+        <div class="details-grid">
+          <div class="details-field">
+            <label for="projectNameField">Project name</label>
+            <input id="projectNameField" data-project-field="name" value="${escapeAttr(project.name || "")}" placeholder="Project name">
+          </div>
+          <div class="details-field">
+            <label for="projectInitialsField">Project initials</label>
+            <input id="projectInitialsField" data-project-field="code" maxlength="8" value="${escapeAttr(code)}" placeholder="AMA">
+          </div>
+          <div class="details-field">
+            <label for="projectStartField">Start date</label>
+            <input id="projectStartField" data-project-field="startDate" type="date" value="${escapeAttr(project.startDate || "")}">
+          </div>
+          <div class="details-field">
+            <label for="projectEndField">End date</label>
+            <input id="projectEndField" data-project-field="deadline" type="date" value="${escapeAttr(project.deadline || "")}">
+          </div>
+          <div class="details-field full">
+            <label for="projectDescriptionField">Project description</label>
+            <textarea id="projectDescriptionField" data-project-field="description" placeholder="Project description">${escapeHtml(project.description || "")}</textarea>
+          </div>
+        </div>
+      ` : `
+        <div class="details-read">
+          <div class="details-read-item"><span>Project name</span><strong>${escapeHtml(project.name || "Untitled project")}</strong></div>
+          <div class="details-read-item"><span>Project initials</span><strong>${escapeHtml(code)}</strong></div>
+          <div class="details-read-item"><span>Start date</span><strong>${project.startDate ? formatDate(project.startDate) : "Not set"}</strong></div>
+          <div class="details-read-item"><span>End date</span><strong>${project.deadline ? formatDate(project.deadline) : "Not set"}</strong></div>
+          <div class="details-read-item full"><span>Project description</span><p>${escapeHtml(description)}</p></div>
+        </div>
+      `;
+
+      document.getElementById("projectDetailsWorkspace").innerHTML = `
+        <div class="project-details-layout">
+          <div class="team-panel">
+            <div class="team-panel-head">
+              <h2>Project details</h2>
+              <button class="btn ${detailsEditMode ? "primary" : ""}" id="toggleProjectDetailsEdit" type="button">${detailsEditMode ? "Done" : "Edit"}</button>
+            </div>
+            ${detailBody}
+          </div>
+          <div class="team-panel">
+            <div class="team-panel-head">
+              <h2>Project documentation</h2>
+              <div class="filters">
+                ${documentationEditMode ? `<button class="btn" id="addProjectDocument" type="button">Add Row</button>` : ""}
+                <button class="btn ${documentationEditMode ? "primary" : ""}" id="toggleProjectDocumentationEdit" type="button">${documentationEditMode ? "Done" : "Edit"}</button>
+              </div>
+            </div>
+            <div class="document-sheet ${documentationEditMode ? "editing" : ""}">
+              <div class="document-header">
+                <span>File</span><span>Type</span><span>Description</span>${documentationEditMode ? "<span>URL</span><span></span>" : "<span>Link</span>"}
+              </div>
+              ${(project.documents || []).map((doc, index) => documentationEditMode ? documentEditRow(doc, index) : documentRow(doc)).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function documentRow(doc) {
+      return `
+        <div class="document-row">
+          <strong>${escapeHtml(doc.title || "Document")}</strong>
+          <small>${escapeHtml(doc.type || "File")}</small>
+          <small>${escapeHtml(doc.note || "")}</small>
+          <button class="shot-action" type="button" data-open-document="${escapeAttr(doc.url || "#")}" title="Open document">${externalIcon()}</button>
+        </div>
+      `;
+    }
+
+    function documentEditRow(doc, index) {
+      return `
+        <div class="document-row" data-document-index="${index}">
+          <input data-document-field="title" value="${escapeAttr(doc.title || "")}" placeholder="File">
+          <input data-document-field="type" value="${escapeAttr(doc.type || "")}" placeholder="Type">
+          <input data-document-field="note" value="${escapeAttr(doc.note || "")}" placeholder="Description">
+          <input data-document-field="url" value="${escapeAttr(doc.url || "")}" placeholder="https://...">
+          <button class="shot-action" type="button" data-remove-document="${index}" title="Remove document">×</button>
+        </div>
+      `;
+    }
+
+    function renderSchedule() {
+      const project = currentShotsProject();
+      if (!project) return;
+      const remainingWeeks = remainingWeeksForProject(project);
+      const metrics = [
+        metric("Remaining weeks", remainingWeeks, "Until December delivery", "calendar"),
+        metric("Next deadline", "Scenes 1-4", "Conclude until end of May", "flag"),
+        metric("Current phase", "Production", "Animation, setup and render", "progress"),
+        metric("Schedule source", "2 files", "Amadeo + studio calendars", "notebook")
+      ].join("");
+      const rows = (project.id === "amadeo" ? amadeoSchedule : genericSchedule(project)).map(scheduleRow).join("");
+      document.getElementById("scheduleWorkspace").innerHTML = `
+        <div class="metric-grid">${metrics}</div>
+        <div class="schedule-panel">
+          <div class="team-panel-head">
+            <h2 class="schedule-title">${icon("calendar")}Production calendar</h2>
+          </div>
+          <div class="schedule-sheet">
+            <div class="schedule-header">
+              <span>Stage</span>${scheduleMonths.map(month => `<span>${month}</span>`).join("")}
+            </div>
+            ${rows}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFinances() {
+      const project = currentShotsProject();
+      const workspace = document.getElementById("financeWorkspace");
+      if (!project || !workspace) return;
+      const finance = project.finance || defaultProjectFinance(project);
+      project.finance = finance;
+      const payments = financePayments(project, finance);
+      const costs = financeCosts(finance);
+      const budget = Number(finance.budget || 0);
+      const studioProfit = studioProfitAmount(finance);
+      const paidTotal = payments.reduce((sum, payment) => sum + Number(payment.paid || 0), 0);
+      const costPaidTotal = costs.reduce((sum, cost) => sum + Number(cost.paid || 0), 0);
+      const spent = paidTotal + costPaidTotal + studioProfit;
+      const pending = payments.reduce((sum, payment) => sum + paymentPending(payment), 0) + costs.reduce((sum, cost) => sum + costPending(cost), 0);
+      const remaining = Math.max(budget - spent - pending, 0);
+      const spendingSources = financeSpendingSources(project, payments, costs, finance);
+      workspace.innerHTML = `
+        <div class="metric-grid">
+          ${[
+            metric("Project budget", money(budget), "Total planned budget", "wallet"),
+            metric("Spent so far", money(spent), "Paid expenses, crew and profit", "check"),
+            metric("Remaining budget", money(remaining), "After pending payments", "progress"),
+            metric("Yet to pay", money(pending), "Open member payments", "alert")
+          ].join("")}
+        </div>
+        <div class="finance-layout">
+          <div class="finance-overview-grid">
+            ${financeInputBoard(finance)}
+            ${financeChartStack(finance.incomeSources || [], spendingSources)}
+            ${monthlySpendingBoard(spent, pending)}
+          </div>
+          <div class="team-panel">
+            <div class="team-panel-head finance-table-head">
+              <div class="finance-panel-tabs" role="tablist" aria-label="Finance tables">
+                <button class="finance-panel-tab ${financeTableTab === "payroll" ? "active" : ""}" type="button" data-finance-table="payroll">${icon("wallet")}Payroll</button>
+                <button class="finance-panel-tab ${financeTableTab === "costs" ? "active" : ""}" type="button" data-finance-table="costs">${icon("calculator")}Costs</button>
+              </div>
+              <div class="finance-table-actions">
+                ${financeTableSummary(payments, costs)}
+                <button class="btn icon-btn payroll-download" type="button" title="Download" aria-label="Download">${icon("download")}</button>
+              </div>
+            </div>
+            ${financeTableTab === "payroll" ? financePayrollTable(project, payments) : financeCostsTable(costs)}
+          </div>
+        </div>
+      `;
+    }
+
+    function financeInputBoard(finance) {
+      const incomes = finance.incomeSources || [];
+      const profitPercent = Number(finance.profitPercent || 0);
+      const profitAmount = studioProfitAmount(finance);
+      if (!financeEditMode) {
+        return `
+          <div class="team-panel finance-input-board">
+            <div class="finance-board-head">
+              <h2 class="finance-card-title">${icon("ledger")}Project Finances</h2>
+              <button class="btn" type="button" id="toggleFinanceEdit">Edit</button>
+            </div>
+            <div class="finance-budget-split">
+              <div class="finance-read-budget">
+                <span>Project budget</span>
+                <strong>${money(finance.budget || 0)}</strong>
+              </div>
+              <div class="finance-read-budget">
+                <span>Studio Profit %</span>
+                <strong>${formatPercent(profitPercent)}</strong>
+                <small>${money(profitAmount)}</small>
+              </div>
+            </div>
+            <div class="finance-field-group">
+              <label>Set incomes</label>
+              <div class="finance-read-list">
+                ${incomes.map(income => `
+                  <div class="finance-read-row">
+                    <span>${escapeHtml(income.label || "Income")}</span>
+                    <strong>${money(income.amount || 0)}</strong>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      return `
+        <div class="team-panel finance-input-board">
+          <div class="finance-board-head">
+            <h2 class="finance-card-title">${icon("ledger")}Project Finances</h2>
+            <button class="btn primary" type="button" id="toggleFinanceEdit">Done</button>
+          </div>
+          <div class="finance-budget-split">
+            <div class="finance-field-group">
+              <label for="financeBudgetInput">Project Budget</label>
+              <input id="financeBudgetInput" data-finance-budget value="${escapeAttr(money(finance.budget || 0))}" aria-label="Project budget">
+            </div>
+            <div class="finance-field-group">
+              <label for="financeProfitInput">Studio Profit %</label>
+              <input id="financeProfitInput" data-finance-profit value="${escapeAttr(formatPercent(profitPercent))}" aria-label="Studio profit percentage">
+            </div>
+          </div>
+          <div class="finance-field-group">
+            <label>Set Incomes</label>
+            <div class="income-list">
+              ${incomes.map((income, index) => `
+                <div class="income-row" data-income-index="${index}">
+                  <div>
+                    <span>Type</span>
+                    <input data-income-field="label" value="${escapeAttr(income.label || "")}" aria-label="Income type">
+                  </div>
+                  <div>
+                    <span>Amount</span>
+                    <input data-income-field="amount" value="${escapeAttr(money(income.amount || 0))}" aria-label="Income amount">
+                  </div>
+                  <button class="income-delete" type="button" data-delete-income="${index}" aria-label="Delete income">&times;</button>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+          <button class="btn" type="button" id="addIncomeBtn">Add Income</button>
+        </div>
+      `;
+    }
+
+    function financeChartStack(incomes, spending) {
+      return `
+        <div class="team-panel finance-chart-stack">
+          ${financePieCard("Project incomes", "wallet", incomes)}
+          ${financePieCard("Project spending", "calculator", spending)}
+        </div>
+      `;
+    }
+
+    function monthlySpendingBoard(spent, pending) {
+      const rows = monthlySpendingData(spent, pending);
+      const max = Math.max(...rows.map(row => row.amount), 1);
+      let currentYear = "";
+      return `
+        <div class="team-panel monthly-spending-board">
+          <h2 class="finance-card-title">${icon("calendar")}Monthly Spending</h2>
+          <div class="monthly-bars">
+            ${rows.map(row => `
+              ${row.year !== currentYear ? (currentYear = row.year, `<div class="monthly-year">${escapeHtml(row.year)}</div>`) : ""}
+              <div class="monthly-bar">
+                <span>${escapeHtml(row.label)}</span>
+                <div class="monthly-bar-track">
+                  <div class="monthly-bar-fill" style="--width:${Math.max(8, Math.round(row.amount / max * 100))}%"></div>
+                </div>
+                <strong>${money(row.amount)}</strong>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function financePayrollTable(project, payments) {
+      return `
+        <div class="payment-tools">
+          <input id="paymentSearch" type="search" value="${escapeAttr(financePaymentSearch)}" placeholder="Search for member" aria-label="Search for member">
+          <select id="paymentRoleFilter" aria-label="Filter payments by role">
+            <option value="all">All roles</option>
+            ${paymentRoleOptions(payments)}
+          </select>
+          <select id="paymentMonthFilter" aria-label="Filter payments by month">
+            ${monthFilterOptions(financePaymentMonth)}
+          </select>
+        </div>
+        <div class="payment-sheet">
+          <div class="payment-header">
+            <span></span><span>Member</span><span>Role</span><span>Payment unit</span><span>Quantity</span><span>Paid</span><span>Yet to pay</span><button class="payment-sort-head" type="button" data-payment-sort-total aria-label="Order payments by total amount">Total ${sortIcon()}</button><span>Receipt</span><span>Contract</span>
+          </div>
+          ${financePaymentRows(project, visibleFinancePayments(payments))}
+        </div>
+      `;
+    }
+
+    function financeCostsTable(costs) {
+      const rows = visibleFinanceCosts(costs);
+      return `
+        <div class="payment-tools cost-tools">
+          <input id="costSearch" type="search" value="${escapeAttr(financeCostSearch)}" placeholder="Search for cost or category" aria-label="Search for cost or category">
+          <select id="costCategoryFilter" aria-label="Filter costs by category">
+            <option value="all">All categories</option>
+            ${costCategoryOptions(costs)}
+          </select>
+          <select id="costMonthFilter" aria-label="Filter costs by month">
+            ${monthFilterOptions(financeCostMonth)}
+          </select>
+        </div>
+        <div class="payment-sheet cost-sheet">
+          <datalist id="costCategoryOptions">
+            ${costCategories.map(category => `<option value="${escapeAttr(category)}"></option>`).join("")}
+          </datalist>
+          <div class="payment-header cost-header">
+            <span></span><span>Cost</span><span>Category</span><span>Paid</span><span>Yet to pay</span><button class="cost-sort-head" type="button" data-cost-sort-total aria-label="Order costs by total amount">Total ${costSortIcon()}</button><span>Receipt</span>
+          </div>
+          ${rows.map(({ cost, index }) => `
+            <div class="payment-row cost-row${selectedCostIndexes.has(index) ? " selected" : ""}" data-cost-index="${index}">
+              <label class="payment-select"><input class="take-select-checkbox" type="checkbox" data-select-cost="${index}" aria-label="Select cost ${escapeAttr(cost.item || "cost")}" ${selectedCostIndexes.has(index) ? "checked" : ""}></label>
+              <input class="payment-input" data-cost-field="item" value="${escapeAttr(cost.item || "")}" aria-label="Cost item">
+              <select data-cost-field="category" aria-label="Cost category">
+                ${costCategorySelectOptions(cost.category || "Operations")}
+              </select>
+              <input class="payment-input" data-cost-field="paid" value="${escapeAttr(money(cost.paid || 0))}" aria-label="Paid cost">
+              <span data-cost-pending>${money(costPending(cost))}</span>
+              <input class="payment-input" data-cost-field="total" value="${escapeAttr(money(cost.total || 0))}" aria-label="Total cost">
+              <button class="shot-action payment-link cost-link" type="button" data-cost-link="receipt" aria-label="Open receipt">${externalIcon()}</button>
+              <button class="cost-add-hover" type="button" data-add-cost-after="${index}" title="Add cost">+</button>
+            </div>
+          `).join("")}
+          <div class="cost-add-strip">
+            <button class="cost-add-hover" type="button" data-add-cost-after="${costs.length - 1}" title="Add cost">+</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function financeTableSummary(payments, costs) {
+      const rows = financeTableTab === "payroll" ? visibleFinancePayments(payments) : visibleFinanceCosts(costs);
+      const total = financeTableTab === "payroll"
+        ? rows.reduce((sum, row) => sum + Number(row.payment.total || 0), 0)
+        : rows.reduce((sum, row) => sum + Number(row.cost.total || 0), 0);
+      const month = financeTableTab === "payroll" ? financePaymentMonth : financeCostMonth;
+      const label = financeTableTab === "payroll" ? "Payroll total" : "Costs total";
+      return `<div class="finance-period-total"><span>${label}</span>${money(total)} · ${financeMonthLabel(month)}</div>`;
+    }
+
+    function monthFilterOptions(value) {
+      const selected = financeMonthOptions().some(month => month.value === value) ? value : defaultFinanceMonth();
+      return financeMonthOptions().map(month => (
+        `<option value="${escapeAttr(month.value)}" ${selected === month.value ? "selected" : ""}>${escapeHtml(month.label)} ${escapeHtml(month.year)}</option>`
+      )).join("");
+    }
+
+    function financePieCard(title, iconName, sources) {
+      const key = title.toLowerCase().replace(/\s+/g, "-");
+      const highlightIndex = financePieHighlights[key];
+      return `
+        <div class="pie-card ${key === "project-incomes" ? "income-card" : key === "project-spending" ? "spending-card" : ""}">
+          <h2 class="finance-card-title">${icon(iconName)}${escapeHtml(title)}</h2>
+          <div class="pie-body">
+            <div class="pie-chart ${highlightIndex != null ? "has-highlight" : ""}" style="${pieStyle(sources, highlightIndex)}">${pieLabels(sources)}</div>
+            <ul class="pie-legend">
+              ${sources.map((source, index) => `
+                <li class="${highlightIndex === index ? "active" : ""}" data-pie-key="${escapeAttr(key)}" data-pie-index="${index}" tabindex="0"><span class="pie-dot" style="background:${escapeAttr(source.color || "var(--pink)")};"></span><span>${escapeHtml(source.label)}</span><strong>${money(source.amount)}</strong></li>
+              `).join("")}
+            </ul>
+          </div>
+        </div>
+      `;
+    }
+
+    function financePayments(project, finance) {
+      finance.payments = finance.payments?.length ? finance.payments : projectCrew(project.id).map(person => ({
+        member: person.member || "Member name",
+        role: person.role || "Member",
+        unit: "Fixed amount",
+        paid: 0,
+        total: 0,
+        contract: "#",
+        receipt: "#"
+      }));
+      finance.payments.forEach((payment, index) => {
+        const paid = Number(payment.paid || 0);
+        const total = payment.total == null ? paid + Number(payment.pending || 0) : Number(payment.total || 0);
+        payment.paid = paid;
+        payment.total = total;
+        payment.unit = payment.unit || "Fixed amount";
+        payment.quantity = payment.quantity || defaultPaymentQuantity(payment);
+        payment.contract = payment.contract || "#";
+        payment.receipt = payment.receipt || "#";
+        payment.month = payment.month || financeMonthOptions()[index % financeMonthOptions().length].value;
+      });
+      return finance.payments;
+    }
+
+    function financeCosts(finance) {
+      finance.costs = Array.isArray(finance.costs) ? finance.costs : [];
+      finance.costs.forEach((cost, index) => {
+        cost.item = cost.item || "New cost";
+        cost.category = cost.category || "Operations";
+        cost.paid = Number(cost.paid || 0);
+        cost.total = cost.total == null ? cost.paid + Number(cost.pending || 0) : Number(cost.total || 0);
+        cost.receipt = cost.receipt || "#";
+        cost.month = cost.month || financeMonthOptions()[index % financeMonthOptions().length].value;
+      });
+      return finance.costs;
+    }
+
+    function costPending(cost) {
+      return Math.max(Number(cost.total || 0) - Number(cost.paid || 0), 0);
+    }
+
+    function financeSpendingSources(project, payments, costs, finance = null) {
+      const colors = ["var(--pink)", "#7ab8f2", "#ffd66b", "#77c987", "#8a75d1", "#f28f6b"];
+      const groups = new Map();
+      payments.forEach(payment => {
+        const label = financeRoleBucket(payment.role || "Payroll");
+        groups.set(label, (groups.get(label) || 0) + Number(payment.total || 0));
+      });
+      costs.forEach(cost => {
+        const label = cost.category || "Operations";
+        groups.set(label, (groups.get(label) || 0) + Number(cost.total || 0));
+      });
+      const profitAmount = studioProfitAmount(finance || project.finance || {});
+      if (profitAmount > 0) groups.set("Studio Profit", (groups.get("Studio Profit") || 0) + profitAmount);
+      return [...groups.entries()]
+        .filter(([, amount]) => amount > 0)
+        .map(([label, amount], index) => ({ label, amount, color: colors[index % colors.length] }));
+    }
+
+    function financeRoleBucket(role) {
+      const value = String(role || "").toLowerCase();
+      if (/director/.test(value)) return "Directors";
+      if (/environment|background|setup/.test(value)) return "Environment artists";
+      if (/tax/.test(value)) return "Taxes";
+      if (/anim/.test(value)) return "Animators";
+      return role || "Payroll";
+    }
+
+    function financePaymentRows(project, payments) {
+      return payments.map(({ payment, index }) => {
+        const paid = Number(payment.paid || 0);
+        const pending = paymentPending(payment);
+        const total = Number(payment.total || 0);
+        const selected = selectedPaymentIndexes.has(index);
+        return `
+          <div class="payment-row${selected ? " selected" : ""}" data-payment-index="${index}">
+            <label class="payment-select"><input class="take-select-checkbox" type="checkbox" aria-label="Select payment for ${escapeAttr(payment.member || "member")}" ${selected ? "checked" : ""}></label>
+            <span>${escapeHtml(payment.member || "Member name")}</span>
+            <span>${escapeHtml(payment.role || "Member")}</span>
+            <select data-payment-field="unit" aria-label="Payment unit">
+              ${paymentUnitOptions(payment.unit)}
+            </select>
+            <input class="payment-input payment-quantity" data-payment-field="quantity" value="${escapeAttr(payment.quantity || "")}" aria-label="Payment quantity">
+            <input class="payment-input" data-payment-field="paid" value="${escapeAttr(money(paid))}" aria-label="Paid amount">
+            <span class="payment-pending" data-payment-pending>${money(pending)}</span>
+            <input class="payment-input" data-payment-field="total" value="${escapeAttr(money(total))}" aria-label="Total payment amount">
+            <button class="shot-action payment-link" type="button" data-payment-link="receipt" aria-label="Open receipt">${externalIcon()}</button>
+            <button class="shot-action payment-link" type="button" data-payment-link="contract" aria-label="Open contract">${externalIcon()}</button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function visibleFinancePayments(payments) {
+      const search = financePaymentSearch.trim().toLowerCase();
+      let rows = payments.map((payment, index) => ({ payment, index }));
+      if (search) rows = rows.filter(({ payment }) => String(payment.member || "").toLowerCase().includes(search));
+      if (financePaymentRole !== "all") rows = rows.filter(({ payment }) => payment.role === financePaymentRole);
+      rows = rows.filter(({ payment }) => payment.month === financePaymentMonth);
+      if (financePaymentSort === "total-desc") rows.sort((a, b) => Number(b.payment.total || 0) - Number(a.payment.total || 0));
+      if (financePaymentSort === "total-asc") rows.sort((a, b) => Number(a.payment.total || 0) - Number(b.payment.total || 0));
+      return rows;
+    }
+
+    function visibleFinanceCosts(costs) {
+      const search = financeCostSearch.trim().toLowerCase();
+      let rows = costs.map((cost, index) => ({ cost, index }));
+      if (search) {
+        rows = rows.filter(({ cost }) => `${cost.item || ""} ${cost.category || ""}`.toLowerCase().includes(search));
+      }
+      if (financeCostCategory !== "all") rows = rows.filter(({ cost }) => cost.category === financeCostCategory);
+      rows = rows.filter(({ cost }) => cost.month === financeCostMonth);
+      if (financeCostSort === "total-desc") rows.sort((a, b) => Number(b.cost.total || 0) - Number(a.cost.total || 0));
+      if (financeCostSort === "total-asc") rows.sort((a, b) => Number(a.cost.total || 0) - Number(b.cost.total || 0));
+      return rows;
+    }
+
+    function costCategoryOptions(costs) {
+      const categories = [...new Set([...costCategories, ...costs.map(cost => cost.category || "Operations")])].sort();
+      return categories.map(category => (
+        `<option value="${escapeAttr(category)}" ${financeCostCategory === category ? "selected" : ""}>${escapeHtml(category)}</option>`
+      )).join("");
+    }
+
+    function costCategorySelectOptions(value) {
+      const categories = [...new Set([...costCategories, value || "Operations"])].sort();
+      return categories.map(category => (
+        `<option value="${escapeAttr(category)}" ${category === value ? "selected" : ""}>${escapeHtml(category)}</option>`
+      )).join("");
+    }
+
+    function paymentRoleOptions(payments) {
+      return [...new Set(payments.map(payment => payment.role || "Member"))].sort().map(role => (
+        `<option value="${escapeAttr(role)}" ${financePaymentRole === role ? "selected" : ""}>${escapeHtml(role)}</option>`
+      )).join("");
+    }
+
+    function paymentUnitOptions(value) {
+      return ["Per second", "Fixed amount", "Per unit", "Per week", "Per month"].map(option => (
+        `<option ${option === value ? "selected" : ""}>${option}</option>`
+      )).join("");
+    }
+
+    function defaultPaymentQuantity(payment) {
+      const role = String(payment.role || "").toLowerCase();
+      if (/environment|background|setup/.test(role)) return "10 envs";
+      if (/anim/.test(role)) return "35s";
+      return "1";
+    }
+
+    function paymentPending(payment) {
+      return Math.max(Number(payment.total || 0) - Number(payment.paid || 0), 0);
+    }
+
+    function pieLabels(sources) {
+      const total = sources.reduce((sum, item) => sum + Number(item.amount || 0), 0) || 1;
+      let cursor = 0;
+      return sources.map(item => {
+        const percent = (Number(item.amount || 0) / total) * 100;
+        const mid = cursor + percent / 2;
+        cursor += percent;
+        if (percent < 4) return "";
+        const radians = (mid - 25) / 100 * Math.PI * 2;
+        const radius = 29;
+        const x = 50 + Math.cos(radians) * radius;
+        const y = 50 + Math.sin(radians) * radius;
+        return `<span class="pie-percent" style="--x:${x.toFixed(1)}%;--y:${y.toFixed(1)}%">${Math.round(percent)}%</span>`;
+      }).join("");
+    }
+
+    function pieStyle(sources, highlightIndex = null) {
+      const total = sources.reduce((sum, item) => sum + Number(item.amount || 0), 0) || 1;
+      if (!sources.length) return "background: conic-gradient(var(--pink) 0 100%);";
+      let cursor = 0;
+      const stops = sources.map((item, index) => {
+        const start = cursor;
+        cursor += (Number(item.amount || 0) / total) * 100;
+        const color = highlightIndex == null || highlightIndex === index ? item.color || "var(--pink)" : "rgba(22, 38, 90, .12)";
+        return `${color} ${start}% ${cursor}%`;
+      }).join(", ");
+      return `background: conic-gradient(${stops});`;
+    }
+
+    function money(value) {
+      return `R$ ${Number(value || 0).toLocaleString("pt-BR")}`;
+    }
+
+    function sortIcon() {
+      if (financePaymentSort === "total-desc") return '<span aria-hidden="true">↓</span>';
+      if (financePaymentSort === "total-asc") return '<span aria-hidden="true">↑</span>';
+      return '<span aria-hidden="true">↕</span>';
+    }
+
+    function costSortIcon() {
+      if (financeCostSort === "total-desc") return '<span aria-hidden="true">↓</span>';
+      if (financeCostSort === "total-asc") return '<span aria-hidden="true">↑</span>';
+      return '<span aria-hidden="true">↕</span>';
+    }
+
+    function monthlySpendingData(spent, pending) {
+      const months = financeMonthOptions();
+      const total = Math.max(Number(spent || 0) + Number(pending || 0), 1);
+      const weights = [0.07, 0.09, 0.11, 0.12, 0.11, 0.13, 0.14, 0.15, 0.16];
+      return months.map((month, index) => ({
+        label: month.label,
+        year: month.year,
+        amount: Math.round(total * weights[index])
+      }));
+    }
+
+    function parseMoney(value) {
+      const normalized = String(value || "")
+        .replace(/[^\d,.-]/g, "")
+        .replace(/\./g, "")
+        .replace(",", ".");
+      return Number.parseFloat(normalized) || 0;
+    }
+
+    function parsePercent(value) {
+      const normalized = String(value || "").replace(/[^\d,.-]/g, "").replace(",", ".");
+      return Math.max(0, Number.parseFloat(normalized) || 0);
+    }
+
+    function formatPercent(value) {
+      return `${Number(value || 0).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`;
+    }
+
+    function studioProfitAmount(finance) {
+      return Math.round(Number(finance?.budget || 0) * Number(finance?.profitPercent || 0) / 100);
+    }
+
+    function genericSchedule(project) {
+      return [
+        { stage: "Pre-production", kind: "active", months: { Jan: "Planning", Fev: "Script / design", Mar: "Storyboard" } },
+        { stage: "Production", kind: "production", months: { Abr: project.phase || "Production", Mai: "Animation", Jun: "Render", Jul: "Review", Ago: "Delivery prep" } },
+        { stage: "Post-production", kind: "post", months: { Set: "Edit and sound", Out: "Final render" } },
+        { stage: "Accountability", kind: "accountability", months: { Nov: "Reports", Dez: "Final package" } }
+      ];
+    }
+
+    function scheduleRow(row) {
+      return `
+        <div class="schedule-row">
+          <div class="schedule-stage ${row.kind}">${escapeHtml(row.stage)}</div>
+          ${scheduleMonths.map(month => {
+            const task = row.months[month];
+            return `<div class="schedule-cell ${task ? row.kind : "empty"}">${task ? escapeHtml(task) : ""}</div>`;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function currentShotsProject() {
+      const projectId = document.getElementById("shotProject").value || data.projects[0].id;
+      return data.projects.find(item => item.id === projectId);
+    }
+
+    function projectCrew(projectId) {
+      const project = data.projects.find(item => item.id === projectId);
+      if (!project) return [];
+      if (Array.isArray(project.crew) && project.crew.length) return project.crew;
+      const artists = [...new Set(data.shots
+        .filter(shot => shot.project === projectId && shot.artist && shot.artist !== "To assign")
+        .map(shot => shot.artist))].sort();
+      return artists.map((member, index) => ({
+        member,
+        role: "Animator",
+        email: "email@studio.com",
+        phone: "+55 00 00000-0000",
+        state: defaultMemberState(index),
+        birthday: defaultMemberBirthday(index),
+        startDate: "",
+        endDate: "",
+        status: "Active",
+        permission: "Member"
+      }));
+    }
+
+    function ensureProjectCrew(projectId) {
+      const project = data.projects.find(item => item.id === projectId);
+      if (!project) return [];
+      if (!Array.isArray(project.crew)) project.crew = projectCrew(projectId);
+      return project.crew;
+    }
+
+    function roleStage(role = "") {
+      if (/director|supervisor/i.test(role)) return "directors";
+      if (/anim/i.test(role)) return "animation";
+      if (/background|bg/i.test(role)) return "background";
+      if (/setup|rig/i.test(role)) return "setup";
+      return "production";
+    }
+
+    function teamMemberRow(person, index) {
+      const selected = selectedTeamMemberIndexes.has(index) ? " selected" : "";
+      return `
+        <div class="team-member-row${selected}" data-team-member="${index}">
+          <label class="team-member-select" aria-label="Select member">
+            <input type="checkbox" data-select-team-member="${index}" ${selected ? "checked" : ""}>
+          </label>
+          <input data-team-field="member" value="${escapeAttr(person.member || "")}" placeholder="Member name" aria-label="Member name">
+          <select data-team-field="role" aria-label="Member role">
+            ${projectRoles.map(role => `<option ${role === person.role ? "selected" : ""}>${role}</option>`).join("")}
+          </select>
+          <input data-team-field="email" value="${escapeAttr(person.email || "")}" placeholder="email@studio.com" aria-label="Member e-mail">
+          <input data-team-field="phone" value="${escapeAttr(person.phone || "")}" placeholder="+55 00 00000-0000" aria-label="Phone number">
+          <input data-team-field="state" value="${escapeAttr(person.state || "")}" placeholder="State" aria-label="State of living">
+          <input class="team-date-field" data-team-field="birthday" value="${escapeAttr(dateDisplay(person.birthday))}" placeholder="dd/mm/aaaa" aria-label="Birthday">
+          <select data-team-field="permission" aria-label="Permission">
+            ${["Admin", "Lead", "Member"].map(permission => `<option ${permission === (person.permission || "Member") ? "selected" : ""}>${permission}</option>`).join("")}
+          </select>
+          <input class="team-date-field" data-team-field="startDate" value="${escapeAttr(dateDisplay(person.startDate))}" placeholder="dd/mm/aaaa" aria-label="Start date">
+          <input class="team-date-field" data-team-field="endDate" value="${escapeAttr(dateDisplay(person.endDate))}" placeholder="dd/mm/aaaa" aria-label="End date">
+          <select data-team-field="status" aria-label="Contract status">
+            ${["Active", "Unactive", "Pending"].map(status => `<option ${status === (person.status || "Active") ? "selected" : ""}>${status}</option>`).join("")}
+          </select>
+        </div>
+      `;
+    }
+
+    function dateDisplay(value) {
+      if (!value) return "";
+      const iso = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+      return value;
+    }
+
+    function normaliseTeamValue(field, value) {
+      if (field === "startDate" || field === "endDate" || field === "birthday") {
+        const match = String(value).trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (match) return `${match[3]}-${match[2]}-${match[1]}`;
+      }
+      return value.trim();
+    }
+
+    function ageFromBirthday(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      const today = new Date();
+      let age = today.getFullYear() - date.getFullYear();
+      const hadBirthday = today.getMonth() > date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() >= date.getDate());
+      if (!hadBirthday) age -= 1;
+      return `${age} yrs`;
+    }
+
+    function daysUntilBirthday(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 9999;
+      const today = new Date();
+      const next = new Date(today.getFullYear(), date.getMonth(), date.getDate());
+      if (next < today) next.setFullYear(today.getFullYear() + 1);
+      return Math.ceil((next - today) / 86400000);
+    }
+
+    function periodValue(value, mode) {
+      if (mode === "week") return Math.max(1, Math.round(value / 12));
+      if (mode === "month") return Math.max(1, Math.round(value / 3));
+      return value;
+    }
+
+    function animationBoard(projectShots, mode = "total") {
+      const totals = projectShots.reduce((map, shot) => {
+        const artist = shot.artist || "To assign";
+        map[artist] = (map[artist] || 0) + Number(shot.seconds || 0);
+        return map;
+      }, { "Camila Souza": 7, "Murilo Carvalho": 6, "Dani Souza": 5 });
+      const rows = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+      const adjusted = rows.map(([artist, seconds]) => [artist, periodValue(seconds, mode)]);
+      const max = Math.max(...adjusted.map(([, seconds]) => seconds), 1);
+      if (!rows.length) return `<p class="team-empty">No animated seconds assigned yet.</p>`;
+      return adjusted.map(([artist, seconds]) => `
+        <div class="animator-row">
+          <span>${escapeHtml(artist)}</span>
+          <div class="progress"><div class="bar" style="--value:${Math.round((seconds / max) * 100)}%"></div></div>
+          <strong>${seconds}s</strong>
+        </div>
+      `).join("");
+    }
+
+    function environmentBoard(mode = "total") {
+      const totals = {
+        "Patrícia Santos": 34,
+        "Gabriel Vieira": 26,
+        "Lucas Martins": 22,
+        "Marina Costa": 18
+      };
+      const divisor = mode === "week" ? 12 : mode === "month" ? 3 : 1;
+      const rows = Object.entries(totals).map(([artist, total]) => [artist, Math.max(1, Math.round(total / divisor))]);
+      const max = Math.max(...rows.map(([, count]) => count), 1);
+      return rows.map(([artist, count]) => `
+        <div class="animator-row">
+          <span>${escapeHtml(artist)}</span>
+          <div class="progress"><div class="bar" style="--value:${Math.round((count / max) * 100)}%"></div></div>
+          <strong>${count} envs</strong>
+        </div>
+      `).join("");
     }
 
     function shotProgressSummary(rows) {
@@ -2413,11 +5211,12 @@ const rows = data.shots.filter(shot => {
       const storageKey = `sagui-scene-open-${group.scene}`;
       const isOpen = localStorage.getItem(storageKey) !== "0";
       const project = document.getElementById("shotProject").value || data.projects[0].id;
-      const lead = sceneLead(project, group.scene);
+      const lead = sceneLead(project, group.scene, activeRollForProject(project));
       return `
         <details class="scene-sheet" data-scene="${escapeAttr(group.scene)}" ${isOpen ? "open" : ""}>
           <summary>
             <span class="scene-arrow">${chevronIcon()}</span>
+            <button class="take-move-handle scene-move-handle" type="button" draggable="true" data-scene-move="${escapeAttr(group.scene)}" aria-label="Move ${escapeAttr(group.scene)}" title="Move scene">${moveIcon()}</button>
             <span class="scene-title">
               <span>${group.scene}</span>
               <small>· Takes ${takeRange(group.shots)} · ${total} takes</small>
@@ -2433,6 +5232,7 @@ const rows = data.shots.filter(shot => {
                 <span></span>
                 <span>Thumbnail</span>
                 <span>Name</span>
+                <span>Sec</span>
                 <span>Animator</span>
                 <span>Sync</span>
                 <span>Anim</span>
@@ -2451,7 +5251,7 @@ const rows = data.shots.filter(shot => {
 
     function shotRow(shot) {
       const selected = selectedShotIds.has(shot.id) ? " selected" : "";
-      const moved = recentlyMovedShotIds.has(shot.id) ? " moved-flash" : "";
+      const moved = recentlyMovedShotIds.has(shot.id) || recentlyAddedShotIds.has(shot.id) ? " moved-flash" : "";
       const artists = artistOptions(shot.artist);
       return `
         <div class="take-row${selected}${moved}" data-shot="${shot.id}" aria-label="Take ${escapeAttr(shot.code)}">
@@ -2461,6 +5261,7 @@ const rows = data.shots.filter(shot => {
           <button class="take-move-handle" type="button" draggable="true" aria-label="Drag ${escapeAttr(shot.code)} to reorder" title="Move take">${moveIcon()}</button>
           ${shotThumb(shot)}
           <input class="take-code" data-field="code" value="${escapeAttr(shot.code)}" aria-label="Shot code">
+          <input class="take-seconds" data-field="seconds" value="${escapeAttr(formatSeconds(shot.seconds))}" aria-label="Seconds">
           <select class="status-tag artist-select" data-field="artist" aria-label="Animator">${artists.map(artist => `<option ${artist === shot.artist ? "selected" : ""}>${escapeHtml(artist)}</option>`).join("")}</select>
           <button class="shot-action" type="button" data-link-field="syncLink" title="Open sync file">${externalIcon()}</button>
           ${selectField("animStatus", displayAnimStatus(shot.animStatus), ["TO APPROVE", "APPROVED", "ON GOING", "REVIEW", "NOT STARTED"])}
@@ -2537,6 +5338,10 @@ const rows = data.shots.filter(shot => {
       return nums.length === 1 ? `${nums[0]}` : `${nums[0]}-${nums[nums.length - 1]}`;
     }
 
+    function formatSeconds(value) {
+      return `${Number(value || 0)}s`;
+    }
+
     function selectField(field, value, options) {
       return `<select class="status-tag ${statusClass(value)}" data-field="${field}">${options.map(option => `<option ${option === value ? "selected" : ""}>${option}</option>`).join("")}</select>`;
     }
@@ -2606,6 +5411,31 @@ const rows = data.shots.filter(shot => {
           selectedThumbnailShotId = nextThumbnailId;
           thumb.classList.add("thumbnail-target");
         });
+        thumb.addEventListener("dblclick", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const shot = data.shots.find(item => item.id === thumb.dataset.thumbnailShot);
+          if (!shot?.thumbnail) {
+            toast("No thumbnail to preview.");
+            return;
+          }
+          openThumbnailViewer(shot.thumbnail, shot.code);
+        });
+      });
+    }
+
+    function openThumbnailViewer(src, label) {
+      document.querySelector(".thumbnail-viewer")?.remove();
+      const viewer = document.createElement("div");
+      viewer.className = "thumbnail-viewer";
+      viewer.innerHTML = `
+        <button type="button" aria-label="Close thumbnail preview">×</button>
+        <img src="${escapeAttr(src)}" alt="${escapeAttr(label)} thumbnail preview">
+      `;
+      document.body.appendChild(viewer);
+      const close = () => viewer.remove();
+      viewer.addEventListener("click", event => {
+        if (event.target === viewer || event.target.closest("button")) close();
       });
     }
 
@@ -2655,17 +5485,17 @@ const rows = data.shots.filter(shot => {
       });
     }
 
-    function sceneKey(project, scene) {
-      return `${project}::${scene}`;
+    function sceneKey(project, scene, roll = "") {
+      return roll ? `${project}::${roll}::${scene}` : `${project}::${scene}`;
     }
 
-    function sceneLead(project, scene) {
-      return data.sceneLeads?.[sceneKey(project, scene)] || "";
+    function sceneLead(project, scene, roll = activeRollForProject(project)) {
+      return data.sceneLeads?.[sceneKey(project, scene, roll)] || data.sceneLeads?.[sceneKey(project, scene)] || "";
     }
 
-    function setSceneLead(project, scene, lead) {
+    function setSceneLead(project, scene, lead, roll = activeRollForProject(project)) {
       data.sceneLeads = data.sceneLeads || {};
-      const key = sceneKey(project, scene);
+      const key = sceneKey(project, scene, roll);
       if (lead) data.sceneLeads[key] = lead;
       else delete data.sceneLeads[key];
     }
@@ -2747,7 +5577,8 @@ const rows = data.shots.filter(shot => {
 
     function deleteScene(scene) {
       const project = document.getElementById("shotProject").value;
-      data.shots = data.shots.filter(shot => !(shot.project === project && shot.scene === scene));
+      const roll = activeRollForProject(project);
+      data.shots = data.shots.filter(shot => !(shot.project === project && shot.roll === roll && shot.scene === scene));
       selectedShotIds.clear();
       if (!data.shots.some(shot => shot.id === selectedThumbnailShotId)) selectedThumbnailShotId = "";
       localStorage.removeItem(`sagui-scene-open-${scene}`);
@@ -2759,13 +5590,13 @@ const rows = data.shots.filter(shot => {
       toast("Scene deleted.");
     }
 
-    function openLinkEditor(anchor, shot, field) {
+    function openLinkEditor(anchor, record, field, afterSave = renderShots) {
       document.querySelector(".link-popover")?.remove();
       const rect = anchor.getBoundingClientRect();
       const popover = document.createElement("div");
       popover.className = "link-popover";
       popover.innerHTML = `
-        <input type="url" value="${escapeAttr(shot[field] || "")}" placeholder="Paste link here" aria-label="Shot link">
+        <input type="url" value="${escapeAttr(record[field] || "")}" placeholder="Paste link here" aria-label="Link URL">
         <div class="link-popover-actions">
           <button type="button" data-close-link>Cancel</button>
           <button type="button" data-save-link>Save</button>
@@ -2781,10 +5612,10 @@ const rows = data.shots.filter(shot => {
       input.select();
       popover.querySelector("[data-close-link]").addEventListener("click", () => popover.remove());
       popover.querySelector("[data-save-link]").addEventListener("click", () => {
-        shot[field] = input.value.trim();
+        record[field] = input.value.trim();
         saveData(false);
         popover.remove();
-        renderShots();
+        afterSave();
       });
       input.addEventListener("keydown", event => {
         if (event.key === "Escape") popover.remove();
@@ -2831,7 +5662,7 @@ const rows = data.shots.filter(shot => {
     }
 
     function isTextEditing(target) {
-      return Boolean(target.closest?.("input, textarea, select, [contenteditable='true']"));
+      return Boolean(target.closest?.("input:not([type='checkbox']), textarea, select, [contenteditable='true']"));
     }
 
     function toggleShotSelection(id, row) {
@@ -2896,7 +5727,7 @@ const rows = data.shots.filter(shot => {
     }
 
     function canDropShot(source, target) {
-      return source && target && source.project === target.project && source.scene === target.scene;
+      return source && target && source.project === target.project && source.roll === target.roll && source.scene === target.scene;
     }
 
     function isBeforeDrop(row, event) {
@@ -2908,6 +5739,72 @@ const rows = data.shots.filter(shot => {
       document.querySelectorAll("#shotSheet .take-row").forEach(row => {
         if (row !== except) row.classList.remove("drop-before", "drop-after");
       });
+    }
+
+    function bindSceneDrag() {
+      let draggedScene = "";
+      document.querySelectorAll("#shotSheet .scene-sheet").forEach(scene => {
+        const handle = scene.querySelector("[data-scene-move]");
+        if (!handle) return;
+        handle.addEventListener("click", event => event.stopPropagation());
+        handle.addEventListener("dragstart", event => {
+          draggedScene = scene.dataset.scene;
+          scene.classList.add("scene-dragging");
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", draggedScene);
+        });
+        handle.addEventListener("dragend", () => {
+          draggedScene = "";
+          clearSceneDropMarkers();
+          scene.classList.remove("scene-dragging");
+        });
+        scene.addEventListener("dragover", event => {
+          if (!draggedScene || draggedScene === scene.dataset.scene) return;
+          event.preventDefault();
+          clearSceneDropMarkers(scene);
+          scene.classList.toggle("scene-drop-before", isBeforeDrop(scene, event));
+          scene.classList.toggle("scene-drop-after", !isBeforeDrop(scene, event));
+        });
+        scene.addEventListener("drop", event => {
+          if (!draggedScene || draggedScene === scene.dataset.scene) return;
+          event.preventDefault();
+          reorderScene(draggedScene, scene.dataset.scene, isBeforeDrop(scene, event));
+        });
+      });
+    }
+
+    function clearSceneDropMarkers(except = null) {
+      document.querySelectorAll("#shotSheet .scene-sheet").forEach(scene => {
+        if (scene !== except) scene.classList.remove("scene-drop-before", "scene-drop-after");
+      });
+    }
+
+    function reorderScene(sourceScene, targetScene, beforeTarget) {
+      const project = document.getElementById("shotProject").value || data.projects[0].id;
+      const roll = activeRollForProject(project);
+      const sourceShots = data.shots.filter(shot => shot.project === project && shot.roll === roll && shot.scene === sourceScene);
+      if (!sourceShots.length) return;
+      data.shots = data.shots.filter(shot => !(shot.project === project && shot.roll === roll && shot.scene === sourceScene));
+      const targetIndexes = data.shots
+        .map((shot, index) => ({ shot, index }))
+        .filter(item => item.shot.project === project && item.shot.roll === roll && item.shot.scene === targetScene)
+        .map(item => item.index);
+      if (!targetIndexes.length) {
+        data.shots.push(...sourceShots);
+      } else {
+        const insertIndex = beforeTarget ? Math.min(...targetIndexes) : Math.max(...targetIndexes) + 1;
+        data.shots.splice(insertIndex, 0, ...sourceShots);
+      }
+      recentlyMovedShotIds = new Set(sourceShots.map(shot => shot.id));
+      saveData(false);
+      renderShots();
+      renderDashboard();
+      renderProjectDetail();
+      renderTimeline();
+      setTimeout(() => {
+        recentlyMovedShotIds.clear();
+        renderShots();
+      }, 1000);
     }
 
     function reorderShot(sourceId, targetId, beforeTarget) {
@@ -2939,7 +5836,7 @@ const rows = data.shots.filter(shot => {
     }
 
     function normaliseShotField(field, value) {
-      if (field === "seconds") return Number(value);
+      if (field === "seconds") return Number.parseFloat(String(value).replace(",", ".")) || 0;
       if (field === "animStatus") {
         return ({
           "TO APPROVE": "Review",
@@ -2981,10 +5878,11 @@ const rows = data.shots.filter(shot => {
       });
     }
 
-    function createShot(project, scene, number, code = "") {
+    function createShot(project, scene, number, code = "", roll = "") {
       return {
         id: `s${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         project,
+        roll: roll || activeRollForProject(project),
         scene,
         code: code || sceneShotCode(project, scene, number),
         seconds: 1,
@@ -2998,29 +5896,35 @@ const rows = data.shots.filter(shot => {
     }
 
     function addShotToScene(project, scene, afterShotId = "") {
-      const existing = data.shots.filter(shot => shot.project === project && shot.scene === scene);
+      const roll = activeRollForProject(project);
+      const existing = data.shots.filter(shot => shot.project === project && shot.roll === roll && shot.scene === scene);
       const next = existing.length + 1;
       const afterShot = afterShotId ? data.shots.find(item => item.id === afterShotId) : null;
       const isLastTake = afterShot && existing[existing.length - 1]?.id === afterShot.id;
       const customCode = afterShot ? (isLastTake ? nextSceneCode(afterShot, existing) : continuationCode(afterShot)) : "";
-      const shot = createShot(project, scene, next, customCode);
+      const shot = createShot(project, scene, next, customCode, roll);
       const afterIndex = afterShotId ? data.shots.findIndex(item => item.id === afterShotId) : -1;
       if (afterIndex >= 0) {
         data.shots.splice(afterIndex + 1, 0, shot);
       } else {
         data.shots.push(shot);
       }
+      recentlyAddedShotIds = new Set([shot.id]);
       localStorage.setItem(`sagui-scene-open-${scene}`, "1");
       saveData(false);
       renderShots();
       renderDashboard();
+      setTimeout(() => {
+        recentlyAddedShotIds.clear();
+        renderShots();
+      }, 1000);
     }
 
     function continuationCode(afterShot) {
       const root = afterShot.code.replace(/\.\d+$/, "");
       const continuationPattern = new RegExp(`^${escapeRegExp(root)}\\.(\\d+)$`, "i");
       const next = data.shots
-        .filter(shot => shot.project === afterShot.project && shot.scene === afterShot.scene)
+        .filter(shot => shot.project === afterShot.project && shot.roll === afterShot.roll && shot.scene === afterShot.scene)
         .map(shot => Number((shot.code.match(continuationPattern) || [])[1]))
         .filter(Boolean)
         .reduce((max, value) => Math.max(max, value), 0) + 1;
@@ -3045,7 +5949,7 @@ const rows = data.shots.filter(shot => {
     }
 
     function projectCode(projectId) {
-      const fallback = { amadeo: "AMA", joao: "JOAO", croc: "CROC" };
+      const fallback = { amadeo: "AEOH", joao: "JOAO", croc: "CROC" };
       const project = data.projects.find(item => item.id === projectId);
       return String(project?.code || fallback[projectId] || projectId).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4) || "PROJ";
     }
@@ -3055,26 +5959,32 @@ const rows = data.shots.filter(shot => {
     }
 
     function addSceneAfter(project, afterScene) {
-      const scene = uniqueSceneName(project);
-      const shot = createShot(project, scene, 1);
+      const roll = activeRollForProject(project);
+      const scene = uniqueSceneName(project, roll);
+      const shot = createShot(project, scene, 1, "", roll);
       const afterIndex = data.shots.reduce((last, item, index) => {
-        return item.project === project && item.scene === afterScene ? index : last;
+        return item.project === project && item.roll === roll && item.scene === afterScene ? index : last;
       }, -1);
       if (afterIndex >= 0) {
         data.shots.splice(afterIndex + 1, 0, shot);
       } else {
         data.shots.push(shot);
       }
+      recentlyAddedShotIds = new Set([shot.id]);
       localStorage.setItem(`sagui-scene-open-${scene}`, "1");
       saveData(false);
       renderShots();
       renderDashboard();
       renderProjectDetail();
       renderTimeline();
+      setTimeout(() => {
+        recentlyAddedShotIds.clear();
+        renderShots();
+      }, 1000);
     }
 
-    function uniqueSceneName(project) {
-      const scenes = new Set(data.shots.filter(shot => shot.project === project).map(shot => shot.scene));
+    function uniqueSceneName(project, roll = activeRollForProject(project)) {
+      const scenes = new Set(data.shots.filter(shot => shot.project === project && shot.roll === roll).map(shot => shot.scene));
       if (!scenes.has("New scene")) return "New scene";
       let index = 2;
       while (scenes.has(`New scene ${index}`)) index += 1;
@@ -3088,10 +5998,13 @@ const rows = data.shots.filter(shot => {
     }
 
     function renderTimeline() {
-      const filter = document.getElementById("timelineProject").value || "all";
+      const timelineSelect = document.getElementById("timelineProject");
+      const timelineContainer = document.getElementById("studioTimeline");
+      if (!timelineSelect || !timelineContainer) return;
+      const filter = timelineSelect.value || "all";
       const projects = data.projects.filter(project => filter === "all" || project.id === filter);
       const items = projects.flatMap(project => project.timeline.map(item => ({ project, period: item[0], task: item[1], progress: item[2] })));
-      document.getElementById("studioTimeline").innerHTML = items.map(item => `
+      timelineContainer.innerHTML = items.map(item => `
         <div class="time-item">
           <span>${item.period}</span>
           <strong>${item.project.name}: ${item.task}</strong>
@@ -3112,13 +6025,63 @@ const rows = data.shots.filter(shot => {
       const project = data.projects.find(p => p.id === projectId);
       const cover = document.getElementById("shotsCover");
       if (!cover) return;
-      if (project?.thumbnail) {
-        cover.innerHTML = `<img src="${escapeAttr(project.thumbnail)}" alt="${escapeAttr(project.name)} cover">`;
-        cover.style.display = "";
-      } else {
+      if (!project) {
         cover.innerHTML = "";
         cover.style.display = "none";
+        cover.style.removeProperty("--shots-cover-image");
+        return;
       }
+      const image = project.thumbnail ? `url("${escapeAttr(project.thumbnail)}")` : "linear-gradient(135deg, var(--blue), var(--pink))";
+      const director = mainDirector(project.id);
+      const deadline = project.deadline ? formatDate(project.deadline) : "No deadline";
+      const weeks = remainingWeeksForProject(project);
+      cover.style.setProperty("--shots-cover-image", image);
+      cover.innerHTML = `
+        <button class="cover-upload-btn" type="button" id="coverUploadBtn" title="Upload cover image" aria-label="Upload cover image">${icon("image")}</button>
+        <input class="cover-upload-input" id="coverUploadInput" type="file" accept="image/*" aria-label="Upload cover image">
+        <div>
+          <strong>${escapeHtml(project.name)}</strong>
+          <div class="cover-meta">
+            <div class="cover-meta-line">
+              <span class="cover-meta-item">${icon("notebook")} Project type: ${escapeHtml(project.type)}</span>
+              <span class="cover-meta-item">${icon("progress")} Completion: ${completion(project)}%</span>
+            </div>
+            <div class="cover-meta-line">
+              <span class="cover-meta-item">${icon("calendar")} Deadline: ${escapeHtml(deadline)}</span>
+              <span class="cover-meta-item">${icon("clock")} Remaining weeks: ${weeks}</span>
+            </div>
+            <div class="cover-meta-director">
+              <span class="cover-meta-item">${icon("user")} Main director: ${escapeHtml(director)}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      cover.style.display = "";
+    }
+
+    function handleShotsCoverUpload(file) {
+      if (!file || !file.type.startsWith("image/")) return;
+      const project = currentShotsProject();
+      if (!project) return;
+      readImageFile(file, src => {
+        project.thumbnail = src;
+        saveData(false);
+        updateShotsCover(project.id);
+        renderDashboard();
+        toast("Cover image updated.");
+      });
+    }
+
+    function mainDirector(projectOrId) {
+      const project = typeof projectOrId === "string"
+        ? data.projects.find(item => item.id === projectOrId)
+        : projectOrId;
+      if (!project) return "Gabriel Vieira";
+      if (project.mainDirector) return project.mainDirector;
+      const crew = Array.isArray(project.crew) && project.crew.length ? project.crew : projectCrew(project.id);
+      const director = crew.find(person => /^director$/i.test(person.role || ""))
+        || crew.find(person => /director/i.test(person.role || ""));
+      return director?.member || (project.id === "croc" ? "Everton Amorim" : "Gabriel Vieira");
     }
 
     function switchSection(id) {
@@ -3261,7 +6224,8 @@ const rows = data.shots.filter(shot => {
       saveData(false);
       closeProjectWizard();
       fillProjectSelects();
-      document.getElementById("detailProject").value = project.id;
+      const detailProject = document.getElementById("detailProject");
+      if (detailProject) detailProject.value = project.id;
       document.getElementById("shotProject").value = project.id;
       renderDashboard();
       renderProjectDetail();
@@ -3287,6 +6251,10 @@ const rows = data.shots.filter(shot => {
       return source.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4) || "PROJ";
     }
 
+    function projectInitialsFromName(name) {
+      return String(name || "Project").split(/\s+/).map(word => word[0]).join("").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4) || "PROJ";
+    }
+
     function setProjectCoverPreview(src) {
       const preview = document.getElementById("newProjectCoverPreview");
       preview.dataset.cover = src;
@@ -3303,7 +6271,7 @@ const rows = data.shots.filter(shot => {
     function deleteSelectedTakes() {
       const count = selectedShotIds.size;
       if (!count) return false;
-      const confirmed = window.confirm(`Confirm deleting of ${count} take${count === 1 ? "" : "s"}?`);
+      const confirmed = window.confirm(`Are you sure you want to delete ${count} take${count === 1 ? "" : "s"}?`);
       if (!confirmed) return true;
       data.shots = data.shots.filter(shot => !selectedShotIds.has(shot.id));
       if (selectedShotIds.has(selectedThumbnailShotId)) selectedThumbnailShotId = "";
@@ -3385,18 +6353,31 @@ const rows = data.shots.filter(shot => {
       });
       coverFile.addEventListener("change", event => handleProjectCoverFile(event.target.files[0]));
       document.addEventListener("keydown", event => {
+        if (event.key === "Escape") document.querySelector(".thumbnail-viewer")?.remove();
         if (event.key === "Escape" && document.getElementById("projectWizardModal").classList.contains("open")) closeProjectWizard();
         if ((event.key === "Delete" || event.key === "Backspace") && !isTextEditing(event.target)) {
-        if (event.key === "Delete" && deleteSelectedTakes()) {
-          event.preventDefault();
-          return;
+          if (event.key === "Delete" && deleteSelectedCosts()) {
+            event.preventDefault();
+            return;
+          }
+          if (event.key === "Delete" && deleteSelectedPayments()) {
+            event.preventDefault();
+            return;
+          }
+          if (event.key === "Delete" && deleteSelectedTeamMembers()) {
+            event.preventDefault();
+            return;
+          }
+          if (event.key === "Delete" && deleteSelectedTakes()) {
+            event.preventDefault();
+            return;
+          }
+          if (deleteSelectedThumbnail()) event.preventDefault();
         }
-        if (deleteSelectedThumbnail()) event.preventDefault();
-      }
       });
       document.addEventListener("paste", pasteImageIntoSelectedThumbnail);
       document.getElementById("projectFilter").addEventListener("change", renderDashboard);
-      document.getElementById("detailProject").addEventListener("change", renderProjectDetail);
+      document.getElementById("detailProject")?.addEventListener("change", renderProjectDetail);
       ["shotProject", "shotStatus", "shotArtist", "shotLead"].forEach(id => document.getElementById(id).addEventListener("change", renderShots));
       document.getElementById("shotSearch").addEventListener("input", renderShots);
       document.getElementById("clearShotFiltersBtn").addEventListener("click", () => {
@@ -3406,7 +6387,7 @@ const rows = data.shots.filter(shot => {
         document.getElementById("shotSearch").value = "";
         renderShots();
       });
-      document.getElementById("timelineProject").addEventListener("change", renderTimeline);
+      document.getElementById("timelineProject")?.addEventListener("change", renderTimeline);
       document.getElementById("expandAllShotsBtn").addEventListener("click", () => {
         document.querySelectorAll(".scene-sheet").forEach(scene => {
           scene.open = true;
@@ -3419,10 +6400,537 @@ const rows = data.shots.filter(shot => {
           localStorage.setItem(`sagui-scene-open-${scene.dataset.scene}`, "0");
         });
       });
+      document.querySelectorAll("[data-shot-tab]").forEach(tab => {
+        tab.addEventListener("click", () => switchShotTab(tab.dataset.shotTab));
+      });
+      document.getElementById("rollTabs").addEventListener("click", event => {
+        const project = document.getElementById("shotProject").value || data.projects[0].id;
+        const rollButton = event.target.closest("[data-roll-id]");
+        if (rollButton) {
+          activeRollId = rollButton.dataset.rollId;
+          localStorage.setItem(rollStorageKey(project), activeRollId);
+          selectedShotIds.clear();
+          selectedThumbnailShotId = "";
+          renderShots();
+          return;
+        }
+        if (event.target.closest("#addRollBtn")) {
+          addRoll(project);
+          return;
+        }
+        const deleteRollButton = event.target.closest("[data-delete-roll-id]");
+        if (deleteRollButton) deleteRoll(project, deleteRollButton.dataset.deleteRollId);
+      });
+      document.getElementById("addTeamMemberBtn").addEventListener("click", () => {
+        const crew = ensureProjectCrew(document.getElementById("shotProject").value);
+        crew.push({ member: "", role: "Animator", email: "", phone: "", state: "", birthday: "", startDate: "", endDate: "", status: "Active", permission: "Member" });
+        saveData(false);
+        renderTeam();
+      });
+      document.getElementById("teamSearch").addEventListener("input", renderTeam);
+      document.getElementById("teamRoleFilter").addEventListener("change", renderTeam);
+      document.getElementById("teamMemberList").addEventListener("input", updateTeamMember);
+      document.getElementById("teamMemberList").addEventListener("change", updateTeamMember);
+      document.getElementById("teamMemberList").addEventListener("click", event => {
+        const row = event.target.closest("[data-team-member]");
+        if (!row) return;
+        const checkbox = event.target.closest("[data-select-team-member]");
+        if (checkbox) {
+          setTeamMemberSelection(Number(checkbox.dataset.selectTeamMember), checkbox.checked, false);
+          renderTeam();
+          return;
+        }
+        if (event.ctrlKey || event.metaKey) {
+          const index = Number(row.dataset.teamMember);
+          setTeamMemberSelection(index, !selectedTeamMemberIndexes.has(index), false);
+          renderTeam();
+        }
+      });
+      document.querySelectorAll("[data-animation-board-mode]").forEach(button => {
+        button.addEventListener("click", () => {
+          animationBoardMode = button.dataset.animationBoardMode;
+          renderTeam();
+        });
+      });
+      document.querySelectorAll("[data-environment-board-mode]").forEach(button => {
+        button.addEventListener("click", () => {
+          environmentBoardMode = button.dataset.environmentBoardMode;
+          renderTeam();
+        });
+      });
+      document.getElementById("financeWorkspace").addEventListener("input", event => {
+        updateFinanceControls(event);
+        updateFinanceInputs(event);
+        updateFinanceCost(event);
+        updateFinancePayment(event);
+      });
+      document.getElementById("financeWorkspace").addEventListener("change", event => {
+        updateFinanceControls(event);
+        updateFinanceInputs(event);
+        updateFinanceCost(event);
+        updateFinancePayment(event);
+      });
+      document.getElementById("financeWorkspace").addEventListener("click", handleFinanceClick);
+      document.getElementById("financeWorkspace").addEventListener("contextmenu", handleFinanceContextMenu);
+      document.getElementById("financeWorkspace").addEventListener("keydown", event => {
+        if ((event.key === "Enter" || event.key === " ") && event.target.closest("[data-pie-key]")) {
+          event.preventDefault();
+          handleFinanceClick(event);
+        }
+      });
+      document.getElementById("shotsCover").addEventListener("click", event => {
+        if (event.target.closest("#coverUploadBtn")) document.getElementById("coverUploadInput")?.click();
+      });
+      document.getElementById("shotsCover").addEventListener("change", event => {
+        if (event.target.id !== "coverUploadInput") return;
+        handleShotsCoverUpload(event.target.files?.[0]);
+        event.target.value = "";
+      });
+      document.getElementById("projectDetailsWorkspace").addEventListener("input", updateProjectDetails);
+      document.getElementById("projectDetailsWorkspace").addEventListener("change", updateProjectDetails);
+      document.getElementById("projectDetailsWorkspace").addEventListener("click", event => {
+        const edit = event.target.closest("#toggleProjectDetailsEdit");
+        const editDocs = event.target.closest("#toggleProjectDocumentationEdit");
+        const addDoc = event.target.closest("#addProjectDocument");
+        const removeDoc = event.target.closest("[data-remove-document]");
+        const link = event.target.closest("[data-open-document]");
+        if (edit) {
+          detailsEditMode = !detailsEditMode;
+          renderDetails();
+        }
+        if (editDocs) {
+          documentationEditMode = !documentationEditMode;
+          renderDetails();
+        }
+        if (addDoc) {
+          const project = currentShotsProject();
+          project.documents = project.documents || [];
+          project.documents.push({ title: "New document", type: "Reference", note: "", url: "#" });
+          saveData(false);
+          renderDetails();
+        }
+        if (removeDoc) {
+          const project = currentShotsProject();
+          if (!window.confirm("Are you sure you want to delete this documentation row?")) return;
+          project.documents.splice(Number(removeDoc.dataset.removeDocument), 1);
+          saveData(false);
+          renderDetails();
+        }
+        if (link) {
+          const url = link.dataset.openDocument;
+          if (url && url !== "#") window.open(url, "_blank");
+          else toast("Document link not connected yet.");
+        }
+      });
       document.getElementById("addShotBtn").addEventListener("click", () => {
         const project = document.getElementById("shotProject").value;
-        addShotToScene(project, "New scene");
+        addShotToScene(project, uniqueSceneName(project, activeRollForProject(project)));
       });
+    }
+
+    function updateFinanceControls(event) {
+      if (event.target.id === "paymentSearch") {
+        financePaymentSearch = event.target.value;
+        const cursor = event.target.selectionStart || financePaymentSearch.length;
+        renderFinances();
+        const nextSearch = document.getElementById("paymentSearch");
+        nextSearch?.focus();
+        nextSearch?.setSelectionRange(cursor, cursor);
+      }
+      if (event.target.id === "paymentRoleFilter") {
+        financePaymentRole = event.target.value;
+        renderFinances();
+      }
+      if (event.target.id === "paymentMonthFilter") {
+        financePaymentMonth = event.target.value;
+        renderFinances();
+      }
+      if (event.target.id === "costSearch") {
+        financeCostSearch = event.target.value;
+        const cursor = event.target.selectionStart || financeCostSearch.length;
+        renderFinances();
+        const nextSearch = document.getElementById("costSearch");
+        nextSearch?.focus();
+        nextSearch?.setSelectionRange(cursor, cursor);
+      }
+      if (event.target.id === "costCategoryFilter") {
+        financeCostCategory = event.target.value;
+        renderFinances();
+      }
+      if (event.target.id === "costMonthFilter") {
+        financeCostMonth = event.target.value;
+        renderFinances();
+      }
+    }
+
+    function updateFinanceInputs(event) {
+      const project = currentShotsProject();
+      if (!project) return;
+      const finance = project.finance || defaultProjectFinance(project);
+      project.finance = finance;
+      if (event.target.matches("[data-finance-budget]")) {
+        finance.budget = parseMoney(event.target.value);
+        saveData(false);
+        if (event.type === "change") {
+          event.target.value = money(finance.budget);
+          renderFinances();
+        }
+        return;
+      }
+      if (event.target.matches("[data-finance-profit]")) {
+        finance.profitPercent = parsePercent(event.target.value);
+        saveData(false);
+        if (event.type === "change") {
+          event.target.value = formatPercent(finance.profitPercent);
+          renderFinances();
+        }
+        return;
+      }
+      const incomeField = event.target.dataset.incomeField;
+      if (!incomeField) return;
+      const row = event.target.closest("[data-income-index]");
+      const income = finance.incomeSources?.[Number(row?.dataset.incomeIndex)];
+      if (!income) return;
+      income[incomeField] = incomeField === "amount" ? parseMoney(event.target.value) : event.target.value;
+      saveData(false);
+      if (event.type === "change") {
+        if (incomeField === "amount") event.target.value = money(income.amount);
+        renderFinances();
+      }
+    }
+
+    function updateFinanceCost(event) {
+      const field = event.target.dataset.costField;
+      if (!field) return;
+      const row = event.target.closest("[data-cost-index]");
+      const project = currentShotsProject();
+      if (!row || !project) return;
+      const finance = project.finance || defaultProjectFinance(project);
+      project.finance = finance;
+      const cost = financeCosts(finance)[Number(row.dataset.costIndex)];
+      if (!cost) return;
+      if (field === "category" && event.type === "change" && !costCategories.includes(event.target.value)) {
+        event.target.value = "Other";
+      }
+      cost[field] = field === "item" || field === "category" ? event.target.value : parseMoney(event.target.value);
+      const pending = row.querySelector("[data-cost-pending]");
+      if (pending) pending.textContent = money(costPending(cost));
+      saveData(false);
+      if (event.type === "change") {
+        if (field !== "item" && field !== "category") event.target.value = money(cost[field]);
+        renderFinances();
+      }
+    }
+
+    function nextFinanceColor(index) {
+      return ["var(--pink)", "#7ab8f2", "#ffd66b", "#77c987", "#8a75d1", "#f28f6b"][index % 6];
+    }
+
+    function handleFinanceClick(event) {
+      const toggleFinanceEdit = event.target.closest("#toggleFinanceEdit");
+      if (toggleFinanceEdit) {
+        financeEditMode = !financeEditMode;
+        renderFinances();
+        return;
+      }
+      const tableTab = event.target.closest("[data-finance-table]");
+      if (tableTab) {
+        financeTableTab = tableTab.dataset.financeTable;
+        renderFinances();
+        return;
+      }
+      const addIncome = event.target.closest("#addIncomeBtn");
+      if (addIncome) {
+        const project = currentShotsProject();
+        if (!project) return;
+        const finance = project.finance || defaultProjectFinance(project);
+        project.finance = finance;
+        finance.incomeSources = finance.incomeSources || [];
+        finance.incomeSources.push({ label: "New income", amount: 0, color: nextFinanceColor(finance.incomeSources.length) });
+        saveData(false);
+        renderFinances();
+        return;
+      }
+      const deleteIncome = event.target.closest("[data-delete-income]");
+      if (deleteIncome) {
+        const project = currentShotsProject();
+        if (!project) return;
+        const finance = project.finance || defaultProjectFinance(project);
+        project.finance = finance;
+        finance.incomeSources?.splice(Number(deleteIncome.dataset.deleteIncome), 1);
+        saveData(false);
+        renderFinances();
+        return;
+      }
+      const addCost = event.target.closest("[data-add-cost-after]");
+      if (addCost) {
+        const project = currentShotsProject();
+        if (!project) return;
+        const finance = project.finance || defaultProjectFinance(project);
+        project.finance = finance;
+        const costs = financeCosts(finance);
+        const index = Number(addCost.dataset.addCostAfter);
+        const insertAt = Number.isFinite(index) ? index + 1 : costs.length;
+        costs.splice(insertAt, 0, { item: "New cost", category: "Operations", paid: 0, total: 0, month: financeCostMonth, receipt: "#" });
+        saveData(false);
+        renderFinances();
+        return;
+      }
+      const costCheckbox = event.target.closest("[data-select-cost]");
+      if (costCheckbox) {
+        setCostSelection(Number(costCheckbox.dataset.selectCost), costCheckbox.checked, false);
+        renderFinances();
+        return;
+      }
+      const costRow = event.target.closest(".cost-row");
+      if (costRow && (event.ctrlKey || event.metaKey)) {
+        const index = Number(costRow.dataset.costIndex);
+        setCostSelection(index, !selectedCostIndexes.has(index), false);
+        renderFinances();
+        return;
+      }
+      const exportPayroll = event.target.closest("#exportPayrollBtn");
+      if (exportPayroll) {
+        toast("Payroll export button added.");
+        return;
+      }
+      const paymentCheckbox = event.target.closest(".payment-select input");
+      if (paymentCheckbox) {
+        const row = paymentCheckbox.closest("[data-payment-index]");
+        if (!row) return;
+        setPaymentSelection(Number(row.dataset.paymentIndex), paymentCheckbox.checked, false);
+        renderFinances();
+        return;
+      }
+      const paymentRow = event.target.closest(".payment-row");
+      if (paymentRow && (event.ctrlKey || event.metaKey)) {
+        const index = Number(paymentRow.dataset.paymentIndex);
+        setPaymentSelection(index, !selectedPaymentIndexes.has(index), false);
+        renderFinances();
+        return;
+      }
+      const totalSort = event.target.closest("[data-payment-sort-total]");
+      if (totalSort) {
+        financePaymentSort = financePaymentSort === "total-desc"
+          ? "total-asc"
+          : financePaymentSort === "total-asc"
+            ? "none"
+            : "total-desc";
+        renderFinances();
+        return;
+      }
+      const costTotalSort = event.target.closest("[data-cost-sort-total]");
+      if (costTotalSort) {
+        financeCostSort = financeCostSort === "total-desc"
+          ? "total-asc"
+          : financeCostSort === "total-asc"
+            ? "none"
+            : "total-desc";
+        renderFinances();
+        return;
+      }
+      const pieItem = event.target.closest("[data-pie-key]");
+      if (pieItem) {
+        const key = pieItem.dataset.pieKey;
+        const index = Number(pieItem.dataset.pieIndex);
+        financePieHighlights[key] = financePieHighlights[key] === index ? null : index;
+        renderFinances();
+        return;
+      }
+      const link = event.target.closest("[data-payment-link]");
+      if (link) {
+        const payment = paymentByRow(link.closest("[data-payment-index]"));
+        const url = payment?.[link.dataset.paymentLink];
+        if (url && url !== "#") window.open(url, "_blank");
+        else toast(`${link.dataset.paymentLink === "receipt" ? "Receipt" : "Contract"} link not connected yet.`);
+      }
+      const costLink = event.target.closest("[data-cost-link]");
+      if (costLink) {
+        const cost = costByRow(costLink.closest("[data-cost-index]"));
+        const url = cost?.[costLink.dataset.costLink];
+        if (url && url !== "#") window.open(url, "_blank");
+        else toast("Receipt link not connected yet.");
+      }
+    }
+
+    function handleFinanceContextMenu(event) {
+      const costLink = event.target.closest("[data-cost-link]");
+      if (costLink) {
+        event.preventDefault();
+        const cost = costByRow(costLink.closest("[data-cost-index]"));
+        if (!cost) return;
+        openLinkEditor(costLink, cost, costLink.dataset.costLink, renderFinances);
+        return;
+      }
+      const link = event.target.closest("[data-payment-link]");
+      if (!link) return;
+      event.preventDefault();
+      const payment = paymentByRow(link.closest("[data-payment-index]"));
+      if (!payment) return;
+      openLinkEditor(link, payment, link.dataset.paymentLink, renderFinances);
+    }
+
+    function paymentByRow(row) {
+      const project = currentShotsProject();
+      if (!row || !project) return null;
+      const finance = project.finance || defaultProjectFinance(project);
+      project.finance = finance;
+      return financePayments(project, finance)[Number(row.dataset.paymentIndex)];
+    }
+
+    function costByRow(row) {
+      const project = currentShotsProject();
+      if (!row || !project) return null;
+      const finance = project.finance || defaultProjectFinance(project);
+      project.finance = finance;
+      return financeCosts(finance)[Number(row.dataset.costIndex)];
+    }
+
+    function setPaymentSelection(index, selected, exclusive = false) {
+      if (!Number.isFinite(index)) return;
+      if (exclusive) selectedPaymentIndexes.clear();
+      if (selected) selectedPaymentIndexes.add(index);
+      else selectedPaymentIndexes.delete(index);
+    }
+
+    function setCostSelection(index, selected, exclusive = false) {
+      if (!Number.isFinite(index)) return;
+      if (exclusive) selectedCostIndexes.clear();
+      if (selected) selectedCostIndexes.add(index);
+      else selectedCostIndexes.delete(index);
+    }
+
+    function deleteSelectedPayments() {
+      if (!selectedPaymentIndexes.size) return false;
+      if (!document.querySelector('[data-shot-tab="finances"].active')) return false;
+      const count = selectedPaymentIndexes.size;
+      if (!window.confirm(`Are you sure you want to delete ${count} payment${count === 1 ? "" : "s"}?`)) return true;
+      const project = currentShotsProject();
+      if (!project) return false;
+      const finance = project.finance || defaultProjectFinance(project);
+      project.finance = finance;
+      const payments = financePayments(project, finance);
+      [...selectedPaymentIndexes].sort((a, b) => b - a).forEach(index => {
+        if (payments[index]) payments.splice(index, 1);
+      });
+      selectedPaymentIndexes.clear();
+      saveData(false);
+      renderFinances();
+      toast(`${count} payment${count === 1 ? "" : "s"} deleted.`);
+      return true;
+    }
+
+    function deleteSelectedCosts() {
+      if (!selectedCostIndexes.size) return false;
+      if (financeTableTab !== "costs" || !document.querySelector('[data-shot-tab="finances"].active')) return false;
+      const count = selectedCostIndexes.size;
+      if (!window.confirm(`Are you sure you want to delete ${count} cost${count === 1 ? "" : "s"}?`)) return true;
+      const project = currentShotsProject();
+      if (!project) return false;
+      const finance = project.finance || defaultProjectFinance(project);
+      project.finance = finance;
+      const costs = financeCosts(finance);
+      [...selectedCostIndexes].sort((a, b) => b - a).forEach(index => {
+        if (costs[index]) costs.splice(index, 1);
+      });
+      selectedCostIndexes.clear();
+      saveData(false);
+      renderFinances();
+      toast(`${count} cost${count === 1 ? "" : "s"} deleted.`);
+      return true;
+    }
+
+    function updateFinancePayment(event) {
+      const field = event.target.dataset.paymentField;
+      if (!field) return;
+      const row = event.target.closest("[data-payment-index]");
+      const project = currentShotsProject();
+      if (!row || !project) return;
+      const finance = project.finance || defaultProjectFinance(project);
+      project.finance = finance;
+      const payment = financePayments(project, finance)[Number(row.dataset.paymentIndex)];
+      if (!payment) return;
+      payment[field] = field === "unit" || field === "quantity" ? event.target.value : parseMoney(event.target.value);
+      const pending = row.querySelector("[data-payment-pending]");
+      if (pending) pending.textContent = money(paymentPending(payment));
+      saveData(false);
+      if (event.type === "change" && field !== "unit" && field !== "quantity") {
+        event.target.value = money(payment[field]);
+        renderFinances();
+      }
+    }
+
+    function updateTeamMember(event) {
+      const field = event.target.dataset.teamField;
+      if (!field) return;
+      const row = event.target.closest("[data-team-member]");
+      const crew = ensureProjectCrew(document.getElementById("shotProject").value);
+      const person = crew[Number(row.dataset.teamMember)];
+      if (!person) return;
+      person[field] = normaliseTeamValue(field, event.target.value);
+      saveData(false);
+      if (event.type === "change") renderTeam();
+    }
+
+    function setTeamMemberSelection(index, selected, exclusive = false) {
+      if (exclusive) selectedTeamMemberIndexes.clear();
+      if (selected) selectedTeamMemberIndexes.add(index);
+      else selectedTeamMemberIndexes.delete(index);
+    }
+
+    function deleteSelectedTeamMembers() {
+      if (!selectedTeamMemberIndexes.size) return false;
+      const count = selectedTeamMemberIndexes.size;
+      if (!window.confirm(`Are you sure you want to delete ${count} member${count === 1 ? "" : "s"}?`)) return true;
+      const crew = ensureProjectCrew(document.getElementById("shotProject").value);
+      [...selectedTeamMemberIndexes].sort((a, b) => b - a).forEach(index => {
+        if (crew[index]) crew.splice(index, 1);
+      });
+      selectedTeamMemberIndexes.clear();
+      saveData(false);
+      renderTeam();
+      return true;
+    }
+
+    function updateProjectDetails(event) {
+      const project = currentShotsProject();
+      if (!project) return;
+      const documentField = event.target.dataset.documentField;
+      if (documentField) {
+        const row = event.target.closest("[data-document-index]");
+        const doc = project.documents?.[Number(row.dataset.documentIndex)];
+        if (!doc) return;
+        doc[documentField] = event.target.value;
+        saveData(false);
+        return;
+      }
+      const field = event.target.dataset.projectField;
+      if (!field) return;
+      project[field] = field === "code"
+        ? event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8)
+        : event.target.value;
+      if (field === "code") event.target.value = project[field];
+      saveData(false);
+      if (field === "name") {
+        fillProjectSelects();
+        document.getElementById("shotProject").value = project.id;
+      }
+      renderDashboard();
+      renderProjectDetail();
+      renderTimeline();
+      if (event.type === "change") {
+        renderShots();
+        renderSchedule();
+      }
+    }
+
+    function switchShotTab(id) {
+      document.querySelectorAll("[data-shot-tab]").forEach(tab => tab.classList.toggle("active", tab.dataset.shotTab === id));
+      document.querySelectorAll("[data-shot-panel]").forEach(panel => panel.classList.toggle("active", panel.dataset.shotPanel === id));
+      if (id === "team") renderTeam();
+      if (id === "details") renderDetails();
+      if (id === "schedule") renderSchedule();
+      if (id === "finances") renderFinances();
     }
 
     function init() {
@@ -3442,8 +6950,3 @@ const rows = data.shots.filter(shot => {
   </script>
 </body>
 </html>
-
-
-
-
-
